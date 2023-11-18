@@ -9,6 +9,7 @@ export async function load({ locals }) {
 
     const settings = await Setting.findOne({});
 
+	// @ts-ignore
 	const { user } = locals;
 
 	return {

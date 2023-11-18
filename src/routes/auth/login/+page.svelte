@@ -4,7 +4,7 @@
 	import { SHA256 } from 'crypto-js';
 
 	export let data;
-	const { user } = data;
+	const { user, settings } = data;
 
 	let email = '';
 	let password = '';
@@ -67,10 +67,12 @@
 		class="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-fixed bg-background-base"
 	>
 		<div class="flex h-full items-center justify-center">
-			<div class="text-custom-seconday">
-				<h2 class="mb-4 text-4xl font-semibold">PELFISH</h2>
+			<div class="text-custom-secondary">
+				<h2 class="mb-4 text-4xl font-semibold">{settings?.name || 'PELFISH'}</h2>
+				<h4>{settings?.location || ''}</h4>
+				<h4 class="mb-4">{settings?.mobile || ''}</h4>
 				<a
-					class="transition no-underline ease-in-out delay-150 bg-custom-seconday hover:-translate-y-1 hover:scale-110 hover:bg-gray-500 duration-300 rounded border-2 border-neutral-50 px-7 pt-[10px] pb-[8px] text-sm font-medium uppercase leading-normal text-custom-primary hover:border-neutral-100 hover:bg-opacity-10 hover:text-neutral-100 focus:border-neutral-100 focus:text-neutral-100 focus:outline-none focus:ring-0 active:border-neutral-200 active:text-neutral-200 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
+					class="transition no-underline ease-in-out delay-150 bg-custom-seconday hover:-translate-y-1 hover:scale-110 hover:bg-gray-500 duration-300 rounded border-2 border-neutral-50 px-7 pt-[10px] pb-[8px] text-sm font-medium uppercase leading-normal text-custom-secondary hover:border-neutral-100 hover:bg-opacity-10 hover:text-neutral-100 focus:border-neutral-100 focus:text-neutral-100 focus:outline-none focus:ring-0 active:border-neutral-200 active:text-neutral-200 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
 					data-te-ripple-init
 					data-te-ripple-color="light"
 					href="https://www.ninjatribe.net/"

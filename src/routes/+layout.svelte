@@ -13,11 +13,13 @@
 	function redirect() {
 		goto('/auth/login');
 	}
+
+	$:console.log('layout', $page.data);
 </script>
 
 <main id="content">
 	{#if $page.data.user}
-		<Navbar />
+		<Navbar data={$page.data} />
 		<Sidebar />
 		<main class="mt-16 ml-[16.5rem]">
 			<slot />

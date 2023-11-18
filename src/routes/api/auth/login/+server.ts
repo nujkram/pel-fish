@@ -32,7 +32,7 @@ export async function POST({ request, cookies }: { request: Request; cookies: an
 	const Users = db.collection('users');
 
 	const user = await Users.findOne({ 'emails.address': email });
-    console.log(user);
+
 	if (!user) {
 		return new Response(
 			JSON.stringify({

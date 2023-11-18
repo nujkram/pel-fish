@@ -8,6 +8,24 @@ module.exports = {
 			height: {},
 			maxWidth: {},
 			colors: {
+				primary: '#06C3EC',
+				secondary: '#113EEE',
+				terciary: '#26D470',
+				primaryHover: '#1AADCD',
+				secondaryHover: '#1532A6',
+				terciaryHover: '#1CAC59',
+				primaryActive: '#88D4E4',
+				secondaryActive: '#4D71FF',
+				terciaryActive: '#66E49C',
+				success: '#26D470',
+				successHover: '#1CAC59',
+				successActive: '#66E49C',
+				danger: '#F32F2F',
+				dangerHover: '#D40F0F',
+				dangerActive: '#F36C6C',
+				warning: '#FF6C36',
+				warningHover: '#E74C3C',
+				warningActive: '#FF9C6C',
 				native: {
 					'gray-400': '#9CA3AF',
 					'gray-500': '#6B7280',
@@ -19,12 +37,11 @@ module.exports = {
 				},
 				custom: {
 					primary: '#3b82f6',
-					seconday: '#e7f63b',
+					secondary: '#e7f63b',
 					lightGreen: '#81E7B2',
 					green: '#62D0AD',
 					red: '#F32F2F',
-					blue: '#4895EA',
-					darkBlue: '#1937B8',
+					blue: '#2E8ACF',
 					orange: '#FF6C36',
 					pink: '#FF418B',
 					brown: '#B26500',
@@ -32,9 +49,8 @@ module.exports = {
 				},
 				background: {
 					base: '#3b82f6',
-					secondary: '#e7f63b',
-					card: '#231F29',
-					field: '#302B38'
+					card: '#e7f63b',
+					field: '#E5E7EB'
 				}
 			},
 			boxShadow: {
@@ -52,12 +68,6 @@ module.exports = {
 			},
 			animation: {
 				gallop: 'rightToLeft 1.5s linear'
-			},
-			fontFamily: {
-				kaushan: ['Kaushan Script', 'cursive'],
-				quicksand: ['Quicksand', 'sans-serif'],
-				bebas: ['Bebas Neue', 'cursive'],
-				racing: ['Racing Sans One', 'cursive']
 			}
 		},
 		backgroundImage: {
@@ -72,5 +82,5 @@ module.exports = {
 	variants: {
 		extend: {}
 	},
-	plugins: [require('@tailwindcss/forms'),]
+	plugins: [require('@tailwindcss/forms')]
 };

@@ -10,13 +10,13 @@
 
   </script>
 
-<div class="fixed inset-0 z-1 overflow-y-auto">
+<div class="fixed inset-0 z-1 overflow-y-auto mt-20">
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
         <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-2 sm:w-full sm:max-w-lg">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <form class="w-full max-w-lg">
                     <div class="flex w-full justify-center items-center px-3">
-                        <img class="md:w-1/3 rounded-full outline outline-1 w-96 h-96" src="{profile.photo.url}" alt="">
+                        <img class="md:w-1/3 rounded-full outline outline-1 " src="{profile.photo.url}" alt="">
                     </div>
                     <div class="flex flex-wrap my-4 -mx-3 mb-6">
                         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
