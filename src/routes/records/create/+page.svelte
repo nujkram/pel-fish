@@ -4,7 +4,10 @@
 	import { goto } from '$app/navigation';
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
 
+	let scientific_name: string = '';
 	let name: string = '';
+	let local_name: string = '';
+	let image: string = '';
 	let environment: string = '';
 	let distribution: string = '';
 	let maturity: number;
@@ -28,6 +31,13 @@
 		{ value: 'Frequently Dangerous', label: 'Frequently Dangerous' },
 		{ value: 'Extremely Dangerous', label: 'Extremly Dangerous' }
 	];
+
+	let uploadImage = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+
+		image = URL.createObjectURL(target.files[0] ?? null);
+
+	}
 </script>
 
 <div class="border border-gray-200 rounded mr-4 p-8">
@@ -41,7 +51,10 @@
 						'content-type': 'application/json'
 					},
 					body: JSON.stringify({
+						scientific_name: scientific_name,
 						name: name,
+						local_name: local_name,
+						image: image,
 						environment: environment,
 						distribution: distribution,
 						maturity: maturity,
@@ -73,6 +86,24 @@
 			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
 				<label
 					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-scientific_name"
+				>
+					Scientific Name
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-scientific_name"
+					type="text"
+					name="scientific_name"
+					bind:value={scientific_name}
+				/>
+			</div>
+		</div>
+
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
 					for="inline-name"
 				>
 					Name
@@ -83,6 +114,43 @@
 					type="text"
 					name="name"
 					bind:value={name}
+				/>
+			</div>
+		</div>
+
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-local_name"
+				>
+					Local Name
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-local_name"
+					type="text"
+					name="local_name"
+					bind:value={local_name}
+				/>
+			</div>
+		</div>
+
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-local_name"
+				>
+					Local Name
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-image"
+					type="file"
+					name="image"
+					on:change={uploadImage}
+					accept=".png, .jpg, .jpeg"
 				/>
 			</div>
 		</div>

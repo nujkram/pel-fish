@@ -2,6 +2,7 @@
     // @ts-nocheck
 	import Button from "$lib/components/reusable/Button.svelte";
     import { onMount } from "svelte";
+    import CircleX from '$lib/components/icons/CircleX.svelte';
 
     export let isEditModalOpen = false;
     export let currentRecord;
@@ -72,8 +73,13 @@
                         <span class="sr-only">Close modal</span>
                     </button>
                     <div class="px-6 py-6 lg:px-8"> 
-                        <div class="flex justify-center items-start">
-                            <h3 class="mb-4 text-m uppercase font-semibold text-gray-900 dark:text-white">Edit Record</h3>
+                        <div class="flex justify-between">
+                            <h2 class="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
+                                Edit Record
+                            </h2>
+                            <button on:click={handleCloseModal} >
+                                <CircleX />
+                            </button>
                         </div>
                         <form class="space-gender-6" on:submit={handleSubmit}>
                             <div>

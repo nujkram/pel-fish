@@ -6,8 +6,22 @@
 	let users = [];
 	let records = [];
 
-	import L from 'leaflet';
-	let map;
+	import 'leaflet/dist/leaflet.css';
+	import {LeafletMap, TileLayer} from 'svelte-leafletjs';
+
+    const mapOptions = {
+        center: [1.364917, 103.822872],
+        zoom: 11,
+    };
+    const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    const tileLayerOptions = {
+        minZoom: 0,
+        maxZoom: 20,
+        maxNativeZoom: 19,
+        attribution: "© OpenStreetMap contributors",
+    };
+
+    let leafletMap;
 	$: {
 		if (users.length > 0) {
 			for (let i = 0; i < roles.length; i++) {
@@ -44,59 +58,7 @@
 		records = await fetchData('/api/admin/record');
 		roles = await fetchData('/api/admin/role');
 	});
-
-	const initialView = [39.8283, -98.5795];
-
-	function createMap(container) {
-		let m = L.map(container, { preferCanvas: true }).setView(initialView, 5);
-		L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-			subdomains: 'abcd',
-			maxZoom: 14
-		}).addTo(m);
-
-		return m;
-	}
-
-	function mapAction(container) {
-		map = createMap(container);
-		// toolbar.addTo(map);
-
-		// markerLayers = L.layerGroup();
-		// for (let location of markerLocations) {
-		// 	let m = createMarker(location);
-		// 	markerLayers.addLayer(m);
-		// }
-
-		// lineLayers = createLines();
-
-		// markerLayers.addTo(map);
-		// lineLayers.addTo(map);
-
-		return {
-			destroy: () => {
-				// toolbar.remove();
-				map.remove();
-				map = null;
-			}
-		};
-	}
-
-	function resizeMap() {
-		if (map) {
-			map.invalidateSize();
-		}
-	}
 </script>
-
-<svelte:head>
-	<link
-		rel="stylesheet"
-		href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-		integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-		crossorigin=""
-	/>
-</svelte:head>
-<svelte:window on:resize={resizeMap} />
 
 <div class="p-4 border-2 border-gray-200 bg-gray-50 rounded-lg dark:border-gray-700">
 	<div class="flex items-center justify-center mb-4 rounded bg-gray-500 dark:bg-gray-800">
@@ -126,7 +88,11 @@
 					<p class="text-gray-500 dark:text-gray-400">Total Records</p>
 				</div>
 			</div>
-			<div class="map" style="height:100%;width:100%" use:mapAction />
+			<div class="h-screen w-full">
+				<LeafletMap bind:this={leafletMap} options={mapOptions}>
+					<TileLayer url={tileUrl} options={tileLayerOptions}/>
+				</LeafletMap>
+			</div>
 		</div>
 	</div>
 	<div class="grid grid-cols-2 gap-4 mb-4">
@@ -136,7 +102,7 @@
 			>
 				<div class="flex items-center justify-between mb-4">
 					<h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">
-						Users - {users.length}
+						Users: {users.length}
 					</h5>
 					<a
 						href="/users"
@@ -180,7 +146,7 @@
 			>
 				<div class="flex items-center justify-between mb-4">
 					<h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">
-						Records - {records.length}
+						Records: {records.length}
 					</h5>
 					<a href="/" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
 						View all records
@@ -191,19 +157,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.map :global(.marker-text) {
-		width: 100%;
-		text-align: center;
-		font-weight: 600;
-		background-color: #444;
-		color: #eee;
-		border-radius: 0.5rem;
-	}
-
-	.map :global(.map-marker) {
-		width: 30px;
-		transform: translateX(-50%) translateY(-25%);
-	}
-</style>
