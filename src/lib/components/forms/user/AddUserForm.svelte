@@ -8,11 +8,11 @@
     export let title;
 	export let loadUsers = () => {};
     import { SHA256 } from 'crypto-js';
+	import CircleX from '$lib/components/icons/CircleX.svelte';
 	let roles = [];
 	let message = null;
 	let alertColor = 'green';
-    let license = '',
-		firstName = '',
+    let firstName = '',
 		middleName = '',
 		lastName = '',
 		username = '',
@@ -56,7 +56,6 @@
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				license,
 				firstName,
 				middleName,
 				lastName,
@@ -112,21 +111,17 @@
 			aria-labelledby="modal-headline"
 		>
 			<div class="p-6">
-				<h2 class="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
-					{title}
-				</h2>
+				<div class="flex justify-between">
+					
+					<h2 class="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
+						{title}
+					</h2>
+					<button on:click={handleCloseModal} >
+						<CircleX />
+					</button>
+				</div>
 				<div class="mt-4">
 					<form class="max-w-lg mx-auto" on:submit={handleSubmit}>
-						<div class="mb-4">
-							<label for="license" class="block mb-2 font-bold text-gray-700">License:</label>
-							<input
-								type="text"
-								id="license"
-								name="license"
-								bind:value={license}
-								class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-							/>
-						</div>
 						<div class="mb-4">
 							<label for="firstName" class="block mb-2 font-bold text-gray-700">First Name:</label>
 							<input

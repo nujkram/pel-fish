@@ -4,17 +4,17 @@
 	import '../app.css';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
-	$: {
-		if (!$page.data.user) {
-			redirect();
-		}
-	}
+	import FrontNav from '$lib/components/FrontNav.svelte';
+	// $: {
+	// 	if (!$page.data.user) {
+	// 		redirect();
+	// 	}
+	// }
 
-	function redirect() {
-		goto('/auth/login');
-	}
+	// function redirect() {
+	// 	goto('/auth/login');
+	// }
 
-	$:console.log('layout', $page.data);
 </script>
 
 <main id="content">
@@ -25,6 +25,7 @@
 			<slot />
 		</main>
 	{:else}
+		<FrontNav />
 		<slot />
 	{/if}
 </main>
