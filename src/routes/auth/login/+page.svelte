@@ -62,7 +62,7 @@
 	};
 </script>
 
-<div class="relative overflow-hidden h-52 text-center translate-y-50 animate-slide-down">
+<div class="relative overflow-hidden h-52 text-center translate-y-50 animate-slide-down mt-12">
 	<div
 		class="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-fixed bg-background-base"
 	>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
-	import { LeafletMap, TileLayer } from 'svelte-leafletjs';
+	import { LeafletMap, TileLayer, Marker } from 'svelte-leafletjs';
 	import { paginate } from 'svelte-paginate';
 	import Sort from './reusable/Sort.svelte';
 	import { goto } from '$app/navigation';
@@ -55,6 +55,7 @@
 	};
 
 	let leafletMap;
+	let markerPosition: any = [];
 
 	const fetchData = async (path: string): Promise<any> => {
 		try {
@@ -74,7 +75,15 @@
 	onMount(async () => {
 		records = await fetchData('/api/admin/record');
 		sortItems(records, 'name', 'asc');
-		console.log('records', records);
+		records.forEach((data) => {
+			let lat = parseFloat(data.latitude);
+			let lng = parseFloat(data.longitude);
+			if (!isNaN(lat) && !isNaN(lng)) {
+				markerPosition.push([lat, lng]);
+			}
+		});
+
+		console.log(markerPosition.length);
 	});
 
 	const sortItems = (fish: Fish[], sortBy: keyof Fish, sortOrder: string) => {
@@ -120,7 +129,7 @@
 			console.log('currentRecord', currentRecord);
 			goto(`records/${currentRecord._id}`);
 		};
-	}
+	};
 
 	$: {
 		if (pageSize < 1) pageSize = 1;
@@ -130,9 +139,10 @@
 					? records.filter((item) => {
 							return status !== 'all'
 								? item.name.match(RegExp(search, 'gi')) ||
-										item.scientific_name.match(RegExp(search, 'gi')) &&
-											item.isActive === (status === 'active')
-								: item.name.match(RegExp(search, 'gi')) || item.scientific_name.match(RegExp(search, 'gi'))
+										(item.scientific_name.match(RegExp(search, 'gi')) &&
+											item.isActive === (status === 'active'))
+								: item.name.match(RegExp(search, 'gi')) ||
+										item.scientific_name.match(RegExp(search, 'gi'));
 					  })
 					: records.filter((items) => {
 							return status !== 'all' ? items.isActive === (status === 'active') : items;
@@ -151,7 +161,7 @@
 			} catch (error: any) {
 				console.error('error', error);
 			}
-		} 
+		}
 	}
 </script>
 
@@ -327,9 +337,20 @@
 				</div>
 			</div>
 			<div class="h-screen w-full">
-				<LeafletMap bind:this={leafletMap} options={mapOptions}>
-					<TileLayer url={tileUrl} options={tileLayerOptions} />
-				</LeafletMap>
+				{#key markerPosition}
+					{#if markerPosition.length}
+						<LeafletMap bind:this={leafletMap} options={mapOptions}>
+							<TileLayer url={tileUrl} options={tileLayerOptions} />
+							{#each markerPosition as marker}
+								<Marker latLng={marker} />
+							{/each}
+						</LeafletMap>
+					{:else}
+					<div class="flex">
+						<p class="mx-auto">No markers to display.</p>
+					</div>
+					{/if}
+				{/key}
 			</div>
 		</div>
 	</div>

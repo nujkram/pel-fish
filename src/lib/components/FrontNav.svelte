@@ -1,11 +1,5 @@
 <script>
-	import AccountProfileForm from '$lib/components/forms/account/AccountProfileForm.svelte';
 	import { goto } from '$app/navigation';
-
-	export let data;
-	const profile = data?.user?.profile;
-	const fullName = profile?.displayName;
-	const imgsrc = profile?.photo?.url;
 
 	let isDropdownOpen = false;
 
