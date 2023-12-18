@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
-	import { LeafletMap, TileLayer, Marker } from 'svelte-leafletjs';
+	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
 	import { paginate } from 'svelte-paginate';
 	import Sort from './reusable/Sort.svelte';
 	import { goto } from '$app/navigation';
@@ -41,6 +41,8 @@
 	let pageMaxIndex: number = pageSize;
 	let sortOrder = 'asc';
 	let currentRecord: any;
+	let leafletMap: any;
+	let markerPosition: any = [];
 
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
@@ -53,9 +55,6 @@
 		maxNativeZoom: 19,
 		attribution: '© OpenStreetMap contributors'
 	};
-
-	let leafletMap;
-	let markerPosition: any = [];
 
 	const fetchData = async (path: string): Promise<any> => {
 		try {
@@ -75,15 +74,6 @@
 	onMount(async () => {
 		records = await fetchData('/api/admin/record');
 		sortItems(records, 'name', 'asc');
-		records.forEach((data) => {
-			let lat = parseFloat(data.latitude);
-			let lng = parseFloat(data.longitude);
-			if (!isNaN(lat) && !isNaN(lng)) {
-				markerPosition.push([lat, lng]);
-			}
-		});
-
-		console.log(markerPosition.length);
 	});
 
 	const sortItems = (fish: Fish[], sortBy: keyof Fish, sortOrder: string) => {
@@ -151,6 +141,17 @@
 				if (paginatedItems.length) {
 					itemSize = paginatedItems.length;
 					paginatedItems = paginate({ items: paginatedItems, pageSize, currentPage });
+
+					markerPosition = [];
+					records.forEach((data: any) => {
+						let lat = parseFloat(data.latitude);
+						let lng = parseFloat(data.longitude);
+						if (!isNaN(lat) && !isNaN(lng)) {
+							markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+						}
+					});
+
+					console.log('markerPosition', markerPosition);
 				}
 
 				pageMinIndex = paginatedItems.length == 0 ? 0 : 1 + (currentPage - 1) * pageSize;
@@ -217,7 +218,9 @@
 						</div>
 					</div>
 					<div class="flex flex-col items-center justify-center rounded dark:bg-gray-800">
-						<p class="mb-2 text-3xl font-extrabold">{records?.length || 0}</p>
+						{#key paginatedItems?.length}
+							<p class="mb-2 text-3xl font-extrabold">{paginatedItems?.length || 0}</p>
+						{/key}
 						<p class="text-gray-500 text-xs dark:text-gray-400 text-center">Records</p>
 					</div>
 				</div>
@@ -337,18 +340,20 @@
 				</div>
 			</div>
 			<div class="h-screen w-full">
-				{#key markerPosition}
+				{#key paginatedItems}
 					{#if markerPosition.length}
-						<LeafletMap bind:this={leafletMap} options={mapOptions}>
+						<LeafletMap this={leafletMap} options={mapOptions}>
 							<TileLayer url={tileUrl} options={tileLayerOptions} />
 							{#each markerPosition as marker}
-								<Marker latLng={marker} />
+								<Marker latLng={marker.coord}>
+									<Popup><a href="/records/{marker.id}">{marker.name}</a></Popup>
+								</Marker>
 							{/each}
 						</LeafletMap>
 					{:else}
-					<div class="flex">
-						<p class="mx-auto">No markers to display.</p>
-					</div>
+						<div class="flex w-full h-full">
+							<p class="m-auto">Map failed to load.</p>
+						</div>
 					{/if}
 				{/key}
 			</div>
