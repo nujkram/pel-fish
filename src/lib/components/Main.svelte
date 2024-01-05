@@ -143,7 +143,7 @@
 					paginatedItems = paginate({ items: paginatedItems, pageSize, currentPage });
 
 					markerPosition = [];
-					records.forEach((data: any) => {
+					paginatedItems.forEach((data: any) => {
 						let lat = parseFloat(data.latitude);
 						let lng = parseFloat(data.longitude);
 						if (!isNaN(lat) && !isNaN(lng)) {
@@ -169,9 +169,9 @@
 <div class="p-4 border-2 border-gray-200 bg-gray-50 rounded-lg dark:border-gray-700">
 	<div class="flex items-center mb-4 rounded bg-gray-500 dark:bg-gray-800">
 		<div
-			class="flex py-8 justify-center flex-row border gap-12 bg-white rounded dark:bg-gray-800 sm:px-16 xl:px-24 w-full"
+			class="flex py-8 justify-center md:flex-row border gap-12 bg-white rounded dark:bg-gray-800 sm:px-16 xl:px-24 w-full flex-col"
 		>
-			<div class="flex flex-col gap-4 mt-8 w-ful">
+			<div class="flex flex-col gap-4 mt-8 w-full overflow-x-auto">
 				<div class="flex gap-4 w-full">
 					<div class="grid grid-cols-9 gap-2">
 						<div class="col-span-2">
@@ -225,7 +225,7 @@
 					</div>
 				</div>
 				<div
-					class="flex items-center justify-center h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800"
+					class="flex  h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800"
 				>
 					<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
 						<thead
@@ -288,55 +288,55 @@
 								{/if}
 							{/key}
 						</tbody>
-						<div class="flex flex-col items-center mt-2">
-							<span class="text-sm text-gray-700 dark:text-gray-400">
-								Showing <span class="font-semibold text-gray-900 dark:text-white"
-									>{pageMinIndex}</span
-								>
-								to
-								<span class="font-semibold text-gray-900 dark:text-white">{pageMaxIndex}</span>
-								of <span class="font-semibold text-gray-900 dark:text-white">{itemSize}</span> Entries
-							</span>
-							<div class="inline-flex mt-2 xs:mt-0">
-								<button
-									on:click={decrementPageNumber}
-									class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-								>
-									<svg
-										aria-hidden="true"
-										class="w-5 h-5 mr-2"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
-											clip-rule="evenodd"
-										/>
-									</svg>
-									Prev
-								</button>
-								<button
-									on:click={incrementPageNumber}
-									class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-								>
-									Next
-									<svg
-										aria-hidden="true"
-										class="w-5 h-5 ml-2"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-											clip-rule="evenodd"
-										/>
-									</svg>
-								</button>
-							</div>
-						</div>
 					</table>
+				</div>
+				<div class="flex flex-col md:items-start my-2 items-end w-full">
+					<span class="text-sm text-gray-700 dark:text-gray-400">
+						Showing <span class="font-semibold text-gray-900 dark:text-white"
+							>{pageMinIndex}</span
+						>
+						to
+						<span class="font-semibold text-gray-900 dark:text-white">{pageMaxIndex}</span>
+						of <span class="font-semibold text-gray-900 dark:text-white">{itemSize}</span> Entries
+					</span>
+					<div class="inline-flex mt-2 xs:mt-0">
+						<button
+							on:click={decrementPageNumber}
+							class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+						>
+							<svg
+								aria-hidden="true"
+								class="w-5 h-5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+							Prev
+						</button>
+						<button
+							on:click={incrementPageNumber}
+							class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+						>
+							Next
+							<svg
+								aria-hidden="true"
+								class="w-5 h-5 ml-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</button>
+					</div>
 				</div>
 			</div>
 			<div class="h-screen w-full">
