@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import 'leaflet/dist/leaflet.css';
 	import { fade } from 'svelte/transition';
 	import Button from '$lib/components/reusable/Button.svelte';
 	import { goto } from '$app/navigation';
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
+	import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
 
 	let scientific_name: string = '';
 	let name: string = '';
@@ -22,6 +25,13 @@
 	let latitude: string = '';
 	let longitude: string = '';
 	let message: string = '';
+	let markers: any = [];
+	let leafletMap: any;
+
+	onMount(() => {
+		const map = leafletMap.getMap();
+		map.on('click', handleClick);
+	});
 
 	const threatOptions = [
 		{ value: 'Harmless', label: 'Harmless' },
@@ -33,11 +43,30 @@
 	];
 
 	let uploadImage = (e: Event) => {
-		const target = e.target as HTMLInputElement;
-
+		const target: any = e.target as HTMLInputElement;
 		image = URL.createObjectURL(target.files[0] ?? null);
+	};
 
-	}
+	const mapOptions = {
+		center: [11.6978352, 122.6217542],
+		zoom: 11,
+		dragging: false
+	};
+	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	const tileLayerOptions = {
+		minZoom: 0,
+		maxZoom: 5,
+		maxNativeZoom: 19,
+		attribution: '© OpenStreetMap contributors'
+	};
+
+	const handleClick = (e: any) => {
+		if(e.latlng) {
+			markers = [e.latlng.lat, e.latlng.lng];
+			latitude = e.latlng.lat;
+			longitude = e.latlng.lng;
+		}
+	};
 </script>
 
 <div class="border border-gray-200 rounded mr-4 p-8">
@@ -303,24 +332,6 @@
 			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
 				<label
 					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-					for="inline-country"
-				>
-					Country
-				</label>
-				<input
-					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-					id="inline-country"
-					type="text"
-					name="country"
-					bind:value={country}
-				/>
-			</div>
-		</div>
-
-		<div class="flex flex-wrap -mx-3 mb-6">
-			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-				<label
-					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
 					for="inline-threat"
 				>
 					Threat
@@ -360,6 +371,31 @@
 			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
 				<label
 					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-country"
+				>
+					Country
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-country"
+					type="text"
+					name="country"
+					bind:value={country}
+				/>
+			</div>
+		</div>
+
+		<div class="h-screen w-full">
+			<LeafletMap bind:this={leafletMap} options={mapOptions} onClick={handleClick}>
+				<TileLayer url={tileUrl} options={tileLayerOptions} />
+					<Marker latLng={markers} />
+			</LeafletMap>
+		</div>
+
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
 					for="inline-latitude"
 				>
 					Latitude
@@ -370,6 +406,7 @@
 					type="text"
 					name="latitude"
 					bind:value={latitude}
+					readonly
 				/>
 			</div>
 
@@ -386,6 +423,7 @@
 					type="text"
 					name="longitude"
 					bind:value={longitude}
+					readonly
 				/>
 			</div>
 		</div>
