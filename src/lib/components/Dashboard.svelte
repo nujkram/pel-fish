@@ -1,27 +1,26 @@
-<script>
-	// @ts-nocheck
+<script lang="ts">
 	import { onMount } from 'svelte';
-
-	let roles = [];
-	let users = [];
-	let records = [];
-
 	import 'leaflet/dist/leaflet.css';
-	import {LeafletMap, TileLayer} from 'svelte-leafletjs';
+	import {LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
+
+	let roles: any = [];
+	let users: any = [];
+	let records: any = [];
+	let markerPosition: any = [];
+    let leafletMap: any;
 
     const mapOptions = {
-        center: [1.364917, 103.822872],
-        zoom: 11,
+        center: [11.6978352, 122.6217542],
+		zoom: 11,
     };
     const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const tileLayerOptions = {
         minZoom: 0,
-        maxZoom: 20,
-        maxNativeZoom: 19,
+		maxZoom: 5,
+		maxNativeZoom: 19,
         attribution: "© OpenStreetMap contributors",
     };
 
-    let leafletMap;
 	$: {
 		if (users.length > 0) {
 			for (let i = 0; i < roles.length; i++) {
@@ -30,7 +29,7 @@
 		}
 	}
 
-	async function fetchData(path) {
+	async function fetchData(path: string) {
 		try {
 			let response = await fetch(path, {
 				method: 'GET',
@@ -45,7 +44,7 @@
 		}
 	}
 
-	function getTotal(array, property, sort) {
+	function getTotal(array: any, property: any, sort: any) {
 		if (!Array.isArray(array) || array.length === 0) return 0;
 		let count = 0;
 		for (let i = 0; i < array.length; i++)
@@ -58,6 +57,18 @@
 		records = await fetchData('/api/admin/record');
 		roles = await fetchData('/api/admin/role');
 	});
+
+	$: {
+		markerPosition = [];
+		records.forEach((data: any) => {
+			let lat = parseFloat(data.latitude);
+			let lng = parseFloat(data.longitude);
+			if (!isNaN(lat) && !isNaN(lng)) {
+				markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+			}
+		});
+		console.log('markerPosition', markerPosition);
+	}
 </script>
 
 <div class="p-4 border-2 border-gray-200 bg-gray-50 rounded-lg dark:border-gray-700">
@@ -89,9 +100,16 @@
 				</div>
 			</div>
 			<div class="h-screen w-full">
-				<LeafletMap bind:this={leafletMap} options={mapOptions}>
+				{#key markerPosition}
+				<LeafletMap this={leafletMap} options={mapOptions}>
 					<TileLayer url={tileUrl} options={tileLayerOptions}/>
+					{#each markerPosition as marker}
+								<Marker latLng={marker.coord}>
+									<Popup><a href="/records/{marker.id}">{marker.name}</a></Popup>
+								</Marker>
+							{/each}
 				</LeafletMap>
+				{/key}
 			</div>
 		</div>
 	</div>
