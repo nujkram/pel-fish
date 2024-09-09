@@ -42,7 +42,7 @@
 	let sortOrder = 'asc';
 	let currentRecord: any;
 	let leafletMap: any;
-	let markerPosition: any = [];
+	let markerPosition: { coord: [number, number]; name: string; id: string }[] = [];
 
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
@@ -51,7 +51,7 @@
 	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	const tileLayerOptions = {
 		minZoom: 0,
-		maxZoom: 5,
+		maxZoom: 9,
 		maxNativeZoom: 19,
 		attribution: '© OpenStreetMap contributors'
 	};
@@ -126,16 +126,26 @@
 		if (records) {
 			try {
 				paginatedItems = search
-					? records.filter((item) => {
-							return status !== 'all'
-								? item.name.match(RegExp(search, 'gi')) ||
-										(item.scientific_name.match(RegExp(search, 'gi')) &&
-											item.isActive === (status === 'active'))
-								: item.name.match(RegExp(search, 'gi')) ||
-										item.scientific_name.match(RegExp(search, 'gi'));
+					? records.filter((item: any) => {
+							const nameMatch =
+								item.name && typeof item.name === 'string'
+									? item.name.match(new RegExp(search, 'gi'))
+									: false;
+							const scientificNameMatch =
+								item.scientific_name && typeof item.scientific_name === 'string'
+									? item.scientific_name.match(new RegExp(search, 'gi'))
+									: false;
+
+							if (status !== 'all') {
+								return (
+									(nameMatch || scientificNameMatch) && item.isActive === (status === 'active')
+								);
+							} else {
+								return nameMatch || scientificNameMatch;
+							}
 					  })
-					: records.filter((items) => {
-							return status !== 'all' ? items.isActive === (status === 'active') : items;
+					: records.filter((item: any) => {
+							return status !== 'all' ? item.isActive === (status === 'active') : true;
 					  });
 
 				if (paginatedItems.length) {
@@ -144,10 +154,21 @@
 
 					markerPosition = [];
 					paginatedItems.forEach((data: any) => {
-						let lat = parseFloat(data.latitude);
-						let lng = parseFloat(data.longitude);
-						if (!isNaN(lat) && !isNaN(lng)) {
-							markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+						if (Array.isArray(data.markers) && data.markers.length > 0) {
+							data.markers.forEach((marker: [number, number]) => {
+								let lat: number = marker[0];
+								let lng: number = marker[1];
+								if (!isNaN(lat) && !isNaN(lng)) {
+									markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+								}
+							});
+						} else {
+							// Fallback to using latitude and longitude if markers array is empty or not present
+							let lat = parseFloat(data.latitude);
+							let lng = parseFloat(data.longitude);
+							if (!isNaN(lat) && !isNaN(lng)) {
+								markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+							}
 						}
 					});
 
@@ -224,9 +245,7 @@
 						<p class="text-gray-500 text-xs dark:text-gray-400 text-center">Records</p>
 					</div>
 				</div>
-				<div
-					class="flex  h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800"
-				>
+				<div class="flex h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800">
 					<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
 						<thead
 							class="text-m text-gray-700 border-b bg-gray-200 dark:bg-gray-700 dark:text-gray-400"
@@ -292,9 +311,7 @@
 				</div>
 				<div class="flex flex-col md:items-start my-2 items-end w-full">
 					<span class="text-sm text-gray-700 dark:text-gray-400">
-						Showing <span class="font-semibold text-gray-900 dark:text-white"
-							>{pageMinIndex}</span
-						>
+						Showing <span class="font-semibold text-gray-900 dark:text-white">{pageMinIndex}</span>
 						to
 						<span class="font-semibold text-gray-900 dark:text-white">{pageMaxIndex}</span>
 						of <span class="font-semibold text-gray-900 dark:text-white">{itemSize}</span> Entries
@@ -304,12 +321,7 @@
 							on:click={decrementPageNumber}
 							class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
 						>
-							<svg
-								aria-hidden="true"
-								class="w-5 h-5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-							>
+							<svg aria-hidden="true" class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
@@ -323,12 +335,7 @@
 							class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
 						>
 							Next
-							<svg
-								aria-hidden="true"
-								class="w-5 h-5 ml-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-							>
+							<svg aria-hidden="true" class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"

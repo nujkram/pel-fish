@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
-	import {LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
+	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
 
 	let roles: any = [];
 	let users: any = [];
 	let records: any = [];
-	let markerPosition: any = [];
-    let leafletMap: any;
+	let markerPosition: { coord: [number, number]; name: string; id: string }[] = [];
+	let leafletMap: any;
 
-    const mapOptions = {
-        center: [11.6978352, 122.6217542],
-		zoom: 11,
-    };
-    const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-    const tileLayerOptions = {
-        minZoom: 0,
-		maxZoom: 5,
+	const mapOptions = {
+		center: [11.6978352, 122.6217542],
+		zoom: 11
+	};
+	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	const tileLayerOptions = {
+		minZoom: 0,
+		maxZoom: 9,
 		maxNativeZoom: 19,
-        attribution: "© OpenStreetMap contributors",
-    };
+		attribution: '© OpenStreetMap contributors'
+	};
 
 	$: {
 		if (users.length > 0) {
@@ -61,10 +61,21 @@
 	$: {
 		markerPosition = [];
 		records.forEach((data: any) => {
-			let lat = parseFloat(data.latitude);
-			let lng = parseFloat(data.longitude);
-			if (!isNaN(lat) && !isNaN(lng)) {
-				markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+			if (Array.isArray(data.markers) && data.markers.length > 0) {
+				data.markers.forEach((marker: [number, number]) => {
+					let lat: number = marker[0];
+					let lng: number = marker[1];
+					if (!isNaN(lat) && !isNaN(lng)) {
+						markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+					}
+				});
+			} else {
+				// Fallback to using latitude and longitude if markers array is empty or not present
+				let lat = parseFloat(data.latitude);
+				let lng = parseFloat(data.longitude);
+				if (!isNaN(lat) && !isNaN(lng)) {
+					markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
+				}
 			}
 		});
 		console.log('markerPosition', markerPosition);
@@ -101,14 +112,14 @@
 			</div>
 			<div class="h-screen w-full">
 				{#key markerPosition}
-				<LeafletMap this={leafletMap} options={mapOptions}>
-					<TileLayer url={tileUrl} options={tileLayerOptions}/>
-					{#each markerPosition as marker}
-								<Marker latLng={marker.coord}>
-									<Popup><a href="/records/{marker.id}">{marker.name}</a></Popup>
-								</Marker>
-							{/each}
-				</LeafletMap>
+					<LeafletMap this={leafletMap} options={mapOptions}>
+						<TileLayer url={tileUrl} options={tileLayerOptions} />
+						{#each markerPosition as marker}
+							<Marker latLng={marker.coord}>
+								<Popup><a href="/records/{marker.id}">{marker.name}</a></Popup>
+							</Marker>
+						{/each}
+					</LeafletMap>
 				{/key}
 			</div>
 		</div>

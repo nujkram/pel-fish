@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
 	import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
+	import L from 'leaflet';
 
 	let scientific_name: string = '';
 	let name: string = '';
@@ -20,19 +21,21 @@
 	let life: string = '';
 	let reference: string = '';
 	let country: string = '';
+	let municipality: string = '';
+	let barangay: string = '';
 	let threat: string = '';
 	let uses: string = '';
 	let latitude: string = '';
 	let longitude: string = '';
 	let message: string = '';
-	let markers: any = [];
+	let markers: L.Marker[] = [];
+	let markerCoordinates: [number, number][] = [];
 	let leafletMap: any;
 
 	onMount(() => {
 		const map = leafletMap.getMap();
-		map.on('click', handleClick);
+		map.on('click', handleMapClick);
 	});
-
 	const threatOptions = [
 		{ value: 'Harmless', label: 'Harmless' },
 		{ value: 'Potentially Harmless', label: 'Potentially Harmless' },
@@ -55,16 +58,39 @@
 	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	const tileLayerOptions = {
 		minZoom: 0,
-		maxZoom: 5,
+		maxZoom: 9,
 		maxNativeZoom: 19,
 		attribution: '© OpenStreetMap contributors'
 	};
 
-	const handleClick = (e: any) => {
-		if(e.latlng) {
-			markers = [e.latlng.lat, e.latlng.lng];
-			latitude = e.latlng.lat;
-			longitude = e.latlng.lng;
+	const handleMapClick = (e: L.LeafletMouseEvent) => {
+		if (e && e.latlng) {
+			const newMarker = L.marker(e.latlng).addTo(leafletMap.getMap());
+			newMarker.on('click', () => handleMarkerClick(newMarker));
+			markers = [...markers, newMarker];
+			markerCoordinates = [...markerCoordinates, [e.latlng.lat, e.latlng.lng]];
+			updateCoordinates();
+		} else {
+			console.warn('Invalid click event or location data:', e);
+		}
+	};
+
+	const handleMarkerClick = (clickedMarker: L.Marker) => {
+		leafletMap.getMap().removeLayer(clickedMarker);
+		const index = markers.indexOf(clickedMarker);
+		markers = markers.filter((marker) => marker !== clickedMarker);
+		markerCoordinates = markerCoordinates.filter((_, i) => i !== index);
+		updateCoordinates();
+	};
+
+	const updateCoordinates = () => {
+		if (markerCoordinates.length > 0) {
+			const lastMarker = markerCoordinates[markerCoordinates.length - 1];
+			latitude = lastMarker[0].toString();
+			longitude = lastMarker[1].toString();
+		} else {
+			latitude = '';
+			longitude = '';
 		}
 	};
 </script>
@@ -93,8 +119,11 @@
 						life: life,
 						reference: reference,
 						country: country,
+						municipality: municipality,
+						barangay: barangay,
 						threat: threat,
 						uses: uses,
+						markers: markerCoordinates,
 						latitude: latitude,
 						longitude: longitude
 					})
@@ -171,7 +200,7 @@
 					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
 					for="inline-local_name"
 				>
-					Local Name
+					Image
 				</label>
 				<input
 					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -385,10 +414,45 @@
 			</div>
 		</div>
 
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-municipality"
+				>
+					Municipality
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-municipality"
+					type="text"
+					name="municipality"
+					bind:value={municipality}
+				/>
+			</div>
+		</div>
+
+		<div class="flex flex-wrap -mx-3 mb-6">
+			<div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+				<label
+					class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+					for="inline-barangay"
+				>
+					Barangay
+				</label>
+				<input
+					class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+					id="inline-barangay"
+					type="text"
+					name="barangay"
+					bind:value={barangay}
+				/>
+			</div>
+		</div>
+
 		<div class="h-screen w-full">
-			<LeafletMap bind:this={leafletMap} options={mapOptions} onClick={handleClick}>
+			<LeafletMap bind:this={leafletMap} options={mapOptions}>
 				<TileLayer url={tileUrl} options={tileLayerOptions} />
-					<Marker latLng={markers} />
 			</LeafletMap>
 		</div>
 
