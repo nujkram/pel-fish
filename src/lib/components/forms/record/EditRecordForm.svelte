@@ -77,9 +77,7 @@
                             <h2 class="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
                                 Edit Record
                             </h2>
-                            <button on:click={handleCloseModal} >
-                                <CircleX />
-                            </button>
+
                         </div>
                         <form class="space-gender-6" on:submit={handleSubmit}>
                             <div>
