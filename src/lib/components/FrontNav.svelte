@@ -4,11 +4,10 @@
 	let isDropdownOpen = false;
 
 	function handleToggleDropDown() {
-		console.log('clicked')
+		console.log('clicked');
 
 		isDropdownOpen = !isDropdownOpen;
 	}
-
 </script>
 
 <nav
@@ -35,7 +34,7 @@
 								aria-expanded="true"
 								aria-haspopup="true"
 								on:click={() => {
-									goto('/')
+									goto('/');
 								}}
 							>
 								Home
@@ -50,9 +49,7 @@
 								id="menu-button"
 								aria-expanded="true"
 								aria-haspopup="true"
-								on:click={() => {
-									
-								}}
+								on:click={() => {}}
 							>
 								About
 							</button>
@@ -63,4 +60,3 @@
 		</div>
 	</div>
 </nav>
-

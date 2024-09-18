@@ -99,8 +99,7 @@
 		paginatedItems = search
 			? items.filter((record) => {
 					return status !== 'all'
-						? (record.name.match(RegExp(search, 'gi'))) ||
-								record.isActive === (status === 'active')
+						? record.name.match(RegExp(search, 'gi')) || record.isActive === (status === 'active')
 						: record.name.match(RegExp(search, 'gi'));
 			  })
 			: items.filter((record) => {
@@ -139,13 +138,20 @@
 						<option class="text-green-600 text-sm font-semibold" value="active"> Active</option>
 						<option class="text-red-500 text-sm font-semibold" value="inactive">Inactive</option>
 					</select>
-					<div class="flex ml-2">
+					<div class="flex ml-2 gap-4">
 						<Button
 							color="success"
 							textSize="text-md"
 							text="Create"
 							type="link"
 							href="/records/create"
+						/>
+						<Button
+							color="primary"
+							textSize="text-md"
+							text="Import"
+							type="link"
+							href="/records/import"
 						/>
 					</div>
 					<div class="col-start-7 col-span-3 rounded">
@@ -262,7 +268,9 @@
 										color="primary"
 										textSize="text-md"
 										text="View"
-										on:click={() => { goto(`/records/${currentRecord?._id}`)}}
+										on:click={() => {
+											goto(`/records/${currentRecord?._id}`);
+										}}
 									>
 										<Eye />
 									</Button>

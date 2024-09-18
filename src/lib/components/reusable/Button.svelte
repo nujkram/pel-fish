@@ -59,47 +59,47 @@
 			activeColor = 'bg-primaryActive';
 			break;
 	}
-	
+
 	function click(event) {
 		dispatch('click', event.detail);
 	}
 </script>
+
 {#if type === 'button'}
-<button
-	type='submit'
-	class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
-	on:mouseenter={() => {
-		active = true;
-		active ? (bgColor = hoverColor) : (bgColor = defaultColor);
-	  }}
-	  on:mouseleave={() => {
-		active = true;
-		active ? (bgColor = defaultColor) : (bgColor = hoverColor);
-	  }}
-	on:click={click}
->
-<span class="flex gap-1">
-
-	<slot /> {text} 
-</span>
-</button>
+	<button
+		type="submit"
+		class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
+		on:mouseenter={() => {
+			active = true;
+			active ? (bgColor = hoverColor) : (bgColor = defaultColor);
+		}}
+		on:mouseleave={() => {
+			active = true;
+			active ? (bgColor = defaultColor) : (bgColor = hoverColor);
+		}}
+		on:click={click}
+	>
+		<span class="flex gap-1">
+			<slot />
+			{text}
+		</span>
+	</button>
 {:else}
-<a
-    {href}
-    class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
-    on:mouseenter={() => {
-      active = true;
-      active ? (bgColor = hoverColor) : (bgColor = defaultColor);
-    }}
-    on:mouseleave={() => {
-      active = true;
-      active ? (bgColor = defaultColor) : (bgColor = hoverColor);
-    }}
-    on:click={() => {
-      activeColor = activeColor;
-    }}
-  >
-    {text}
-  </a>
+	<a
+		{href}
+		class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
+		on:mouseenter={() => {
+			active = true;
+			active ? (bgColor = hoverColor) : (bgColor = defaultColor);
+		}}
+		on:mouseleave={() => {
+			active = true;
+			active ? (bgColor = defaultColor) : (bgColor = hoverColor);
+		}}
+		on:click={() => {
+			activeColor = activeColor;
+		}}
+	>
+		{text}
+	</a>
 {/if}
-

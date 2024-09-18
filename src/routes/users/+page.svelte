@@ -3,17 +3,17 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { paginate } from 'svelte-paginate';
-	import Button from "$lib/components/reusable/Button.svelte";
-	import EditUserForm from "$lib/components/forms/user/EditUserForm.svelte";
-	import DeleteUserForm from "$lib/components/forms/user/DeleteUserForm.svelte";
-	import Sort from "$lib/components/reusable/Sort.svelte";
-	import Edit from "$lib/components/icons/Edit.svelte";
-	import Trash from "$lib/components/icons/Trash.svelte";
+	import Button from '$lib/components/reusable/Button.svelte';
+	import EditUserForm from '$lib/components/forms/user/EditUserForm.svelte';
+	import DeleteUserForm from '$lib/components/forms/user/DeleteUserForm.svelte';
+	import Sort from '$lib/components/reusable/Sort.svelte';
+	import Edit from '$lib/components/icons/Edit.svelte';
+	import Trash from '$lib/components/icons/Trash.svelte';
 	import AddUserForm from '$lib/components/forms/user/AddUserForm.svelte';
 
-    let status = 'all'
-    let search;
-    let items = [];
+	let status = 'all';
+	let search;
+	let items = [];
 	let currentPage = 1;
 	let pageSize = 10;
 	let itemSize;
@@ -23,13 +23,13 @@
 	let pageMaxIndex = pageSize;
 	let sortOrder = 'asc';
 	let sortBy = 'code';
-    let isAddModalOpen = false;
-    let isEditModalOpen = false;
+	let isAddModalOpen = false;
+	let isEditModalOpen = false;
 	let isConfirmModalOpen = false;
-    
+
 	// Modals
-    const handleAddModal = () => (isAddModalOpen = !isAddModalOpen);
-    const handleEditModal = () => (isEditModalOpen = !isEditModalOpen);
+	const handleAddModal = () => (isAddModalOpen = !isAddModalOpen);
+	const handleEditModal = () => (isEditModalOpen = !isEditModalOpen);
 	const handleConfirmDeleteModal = () => (isConfirmModalOpen = !isConfirmModalOpen);
 
 	function currentUserExist() {
@@ -76,11 +76,11 @@
 		sortItems();
 	}
 
-    const handleOverFlow = () => {
+	const handleOverFlow = () => {
 		if (pageMinIndex > itemSize) currentPage = 1;
 	};
 
-    const decrementPageNumber = () => {
+	const decrementPageNumber = () => {
 		if (currentPage > 1) currentPage -= 1;
 	};
 	const incrementPageNumber = () => {
@@ -125,7 +125,7 @@
 			<span class="text-xl font-semibold" style="color:white">Manage users</span>
 		</div>
 		<div class="flex gap-4 h-auto px-5 py-5 bg-white dark:bg-gray-800">
-			<div class="flex flex-col w-full h-auto ">
+			<div class="flex flex-col w-full h-auto">
 				<label
 					for="status"
 					class="block mb-2 pl-1 text-m font-semibold text-gray-900 dark:text-white">Status</label
@@ -141,9 +141,9 @@
 						<option class="text-red-500 text-sm font-semibold" value="inactive">Inactive</option>
 					</select>
 					<div class="flex ml-2">
-						<Button color='success' textSize='text-md' text='Create' on:click={handleAddModal} />
+						<Button color="success" textSize="text-md" text="Create" on:click={handleAddModal} />
 					</div>
-					<div class="col-start-7 col-span-3 rounded ">
+					<div class="col-start-7 col-span-3 rounded">
 						<form class="flex items-center">
 							<label for="search" class="sr-only">Search</label>
 							<div class="relative w-full">
@@ -164,7 +164,7 @@
 									type="search"
 									bind:value={search}
 									id="search"
-									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 									placeholder="Search"
 									required
 								/>
@@ -177,24 +177,16 @@
 	</div>
 	<div class="flex items-center justify-center h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800">
 		<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
-			<thead class="text-m  text-gray-700 border-b bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
+			<thead class="text-m text-gray-700 border-b bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
 				<tr>
+					<th scope="col" class="pl-6"> Last Name </th>
+					<th scope="col" class="pl-6"> First Name </th>
+					<th scope="col" class="pl-6"> Middle Name </th>
+					<th scope="col" class="pl-6"> Email </th>
 					<th scope="col" class="pl-6">
-                        Last Name
+						Status
+						<Sort on:click={() => handleSort('isActive')} />
 					</th>
-					<th scope="col" class="pl-6">
-                        First Name
-					</th>
-                    <th scope="col" class="pl-6">
-                        Middle Name
-					</th>
-                    <th scope="col" class="pl-6">
-                        Email
-					</th>
-					<th scope="col" class="pl-6">
-                        Status 
-                        <Sort on:click={() => handleSort('isActive')} />
-                    </th>
 					<th scope="col" class="pl-6">
 						<div class="flex gap-2 w-max">
 							<label for="items" class="block text-m font-semibold text-gray-900 dark:text-white"
@@ -231,18 +223,24 @@
 									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
 								>
 									{data?.profile?.lastName || ''}
-                                </td>
-								<td class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium">
+								</td>
+								<td
+									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
+								>
 									{data?.profile?.firstName || ''}
 								</td>
-								<td class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium">
+								<td
+									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
+								>
 									{data?.profile?.middleName || ''}
 								</td>
-								<td class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium">
+								<td
+									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
+								>
 									{data?.profile?.email || ''}
 								</td>
 								<td class="flex items-center px-6 py-4">
-									<div class="flex items-center ">
+									<div class="flex items-center">
 										<div
 											class={data.isActive
 												? 'h-2.5 w-2.5 rounded-full bg-green-500 mr-2'
@@ -256,13 +254,17 @@
 
 								<td class="px-6 py-4 col-span-3">
 									<Button
-                                        color='warning' textSize='text-md' text='Update'
+										color="warning"
+										textSize="text-md"
+										text="Update"
 										on:click={handleEditModal}
 									>
 										<Edit />
 									</Button>
 									<Button
-                                        color='danger' textSize='text-md' text='Delete'
+										color="danger"
+										textSize="text-md"
+										text="Delete"
 										on:click={handleConfirmDeleteModal}
 									>
 										<Trash />
@@ -311,8 +313,8 @@
 		</table>
 	</div>
 </div>
-{#if isAddModalOpen }
-	<AddUserForm title='Add User' bind:isAddModalOpen {loadUsers} />
+{#if isAddModalOpen}
+	<AddUserForm title="Add User" bind:isAddModalOpen {loadUsers} />
 {/if}
 {#if currentUserExist}
 	{#if isEditModalOpen}

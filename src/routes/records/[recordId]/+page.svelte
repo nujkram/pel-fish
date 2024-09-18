@@ -5,6 +5,7 @@
 	export let data;
 
 	let { record } = data;
+
 	let imageError: Boolean = record?.image ? false : true;
 </script>
 
@@ -15,11 +16,14 @@
 				<div
 					class="w-24 h-24 bg-indigo-100 mx-auto rounded-full shadow-2xl absolute inset-x-0 top-0 -mt-24 flex items-center justify-center text-indigo-500"
 				>
-					{#if !imageError}
+					{#if !imageError && record?.image}
 						<img
-							src={record?.image || ''}
+							src={record.image.startsWith('data:')
+								? record.image
+								: `data:image/jpeg;base64,${record.image}`}
 							on:error={() => (imageError = true)}
 							alt={record?.name}
+							class="w-full h-full object-cover rounded-full"
 						/>
 					{:else}
 						<LiveBuoy />
@@ -76,18 +80,18 @@
 			<div class="mt-6 font-bold">Main Reference</div>
 			<div class="text-base mt-2">{record.reference}</div>
 		{/if}
-		
-        {#if record?.country}
+
+		{#if record?.country}
 			<div class="mt-6 font-bold">Countries</div>
 			<div class="text-base mt-2">{record.country}</div>
 		{/if}
-		
-        {#if record?.threat}
+
+		{#if record?.threat}
 			<div class="mt-6 font-bold">Threat to Humans</div>
 			<div class="text-base mt-2">{record.threat}</div>
 		{/if}
-		
-        {#if record?.uses}
+
+		{#if record?.uses}
 			<div class="mt-6 font-bold">Human uses</div>
 			<div class="text-base mt-2">{record.uses}</div>
 		{/if}

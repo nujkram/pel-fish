@@ -3,7 +3,13 @@
 	export let buttonName, href, img, clickEvent;
 </script>
 
-<div class="h-10 dark:bg-gray-800" on:click={clickEvent} on:keydown={clickEvent} role="button" tabindex="0">
+<div
+	class="h-10 dark:bg-gray-800"
+	on:click={clickEvent}
+	on:keydown={clickEvent}
+	role="button"
+	tabindex="0"
+>
 	<ul class="space-y-2">
 		<li>
 			<a

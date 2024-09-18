@@ -14,7 +14,6 @@
 	// function redirect() {
 	// 	goto('/auth/login');
 	// }
-
 </script>
 
 <main id="content">

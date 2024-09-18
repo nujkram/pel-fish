@@ -15,8 +15,8 @@ export async function POST({ request }) {
 		country: data.country,
 		province: data.province,
 		email: data.email,
-		photo: ""
-	}
+		photo: ''
+	};
 
 	const user = {
 		_id: id(),
@@ -39,9 +39,9 @@ export async function POST({ request }) {
 		profile: profile,
 		isActive: true,
 		isFake: false,
-		role: data.role,
-	}
-	
+		role: data.role
+	};
+
 	const response = await User.insertOne(user);
 	if (response) {
 		return new Response(

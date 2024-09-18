@@ -11,7 +11,8 @@
 	let scientific_name: string = '';
 	let name: string = '';
 	let local_name: string = '';
-	let image: string = '';
+	let selectedFile: File;
+	let imageBase64: string;
 	let environment: string = '';
 	let distribution: string = '';
 	let maturity: number;
@@ -45,9 +46,17 @@
 		{ value: 'Extremely Dangerous', label: 'Extremly Dangerous' }
 	];
 
-	let uploadImage = (e: Event) => {
-		const target: any = e.target as HTMLInputElement;
-		image = URL.createObjectURL(target.files[0] ?? null);
+	const uploadImage = (e: Event): void => {
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files[0]) {
+			selectedFile = target.files[0];
+			const fileReader = new FileReader();
+			fileReader.onload = () => {
+				const base64Image = fileReader.result as string;
+				imageBase64 = base64Image;
+			};
+			fileReader.readAsDataURL(selectedFile);
+		}
 	};
 
 	const mapOptions = {
@@ -109,7 +118,7 @@
 						scientific_name: scientific_name,
 						name: name,
 						local_name: local_name,
-						image: image,
+						image: imageBase64,
 						environment: environment,
 						distribution: distribution,
 						maturity: maturity,
