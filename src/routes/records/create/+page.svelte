@@ -49,13 +49,46 @@
 	const uploadImage = (e: Event): void => {
 		const target = e.target as HTMLInputElement;
 		if (target.files && target.files[0]) {
-			selectedFile = target.files[0];
-			const fileReader = new FileReader();
-			fileReader.onload = () => {
-				const base64Image = fileReader.result as string;
-				imageBase64 = base64Image;
+			const file: File = target.files[0];
+			const reader: FileReader = new FileReader();
+
+			reader.onload = (event: ProgressEvent<FileReader>): void => {
+				const img: HTMLImageElement = new Image();
+				img.onload = (): void => {
+					const canvas: HTMLCanvasElement = document.createElement('canvas');
+					const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
+
+					// Set maximum width or height
+					const maxSize: number = 800;
+					let width: number = img.width;
+					let height: number = img.height;
+
+					if (width > height) {
+						if (width > maxSize) {
+							height *= maxSize / width;
+							width = maxSize;
+						}
+					} else {
+						if (height > maxSize) {
+							width *= maxSize / height;
+							height = maxSize;
+						}
+					}
+
+					canvas.width = width;
+					canvas.height = height;
+
+					ctx?.drawImage(img, 0, 0, width, height);
+
+					// Compress and convert to base64
+					const compressedBase64: string = canvas.toDataURL('image/jpeg', 0.7);
+					console.log('compressedBase64', compressedBase64);
+					imageBase64 = compressedBase64;
+				};
+				img.src = event.target?.result as string;
 			};
-			fileReader.readAsDataURL(selectedFile);
+
+			reader.readAsDataURL(file);
 		}
 	};
 
