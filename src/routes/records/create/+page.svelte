@@ -82,7 +82,6 @@
 
 					// Compress and convert to base64
 					const compressedBase64: string = canvas.toDataURL('image/jpeg', 0.7);
-					console.log('compressedBase64', compressedBase64);
 					imageBase64 = compressedBase64;
 				};
 				img.src = event.target?.result as string;
@@ -95,14 +94,13 @@
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
 		zoom: 11,
-		dragging: false
+		dragging: true
 	};
 	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	const tileLayerOptions = {
 		minZoom: 0,
 		maxZoom: 9,
 		maxNativeZoom: 19,
-		attribution: '© OpenStreetMap contributors'
 	};
 
 	const handleMapClick = (e: L.LeafletMouseEvent) => {

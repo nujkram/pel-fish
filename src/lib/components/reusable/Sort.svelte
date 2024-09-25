@@ -3,7 +3,6 @@
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 	function handleClick(event) {
-		console.log('clicked');
 		dispatch('click', event);
 	}
 </script>

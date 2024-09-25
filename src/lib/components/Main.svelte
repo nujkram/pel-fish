@@ -116,7 +116,6 @@
 
 	const viewRecord = () => {
 		return () => {
-			console.log('currentRecord', currentRecord);
 			goto(`records/${currentRecord._id}`);
 		};
 	};
@@ -171,8 +170,6 @@
 							}
 						}
 					});
-
-					console.log('markerPosition', markerPosition);
 				}
 
 				pageMinIndex = paginatedItems.length == 0 ? 0 : 1 + (currentPage - 1) * pageSize;

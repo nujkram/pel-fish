@@ -10,6 +10,7 @@
 	import Edit from '$lib/components/icons/Edit.svelte';
 	import Trash from '$lib/components/icons/Trash.svelte';
 	import Eye from '$lib/components/icons/Eye.svelte';
+	import LiveBuoy from '$lib/components/icons/LiveBuoy.svelte';
 
 	let status = 'all';
 	let search;
@@ -52,7 +53,6 @@
 			});
 			let result = await response.json();
 			items = result.response;
-			console.log(items);
 			sortItems();
 		} catch (error) {
 			console.error('error', error);
@@ -283,6 +283,14 @@
 										<Edit />
 									</Button>
 									<Button
+										color="warning"
+										textSize="text-md"
+										text="Add Map"
+										on:click={goto(`/records/${currentRecord?._id}/map`)}
+									>
+										<LiveBuoy />
+									</Button>
+									<Button
 										color="danger"
 										textSize="text-md"
 										text="Delete"
@@ -337,7 +345,7 @@
 
 {#if currentRecordExist}
 	{#if isEditModalOpen}
-		<EditRecordForm bind:isEditModalOpen bind:currentRecord {loadRecord} />
+		<EditRecordForm bind:isEditModalOpen bind:currentRecord />
 	{/if}
 	{#if isConfirmModalOpen}
 		<DeleteRecordForm bind:isConfirmModalOpen {currentRecord} {loadRecord} />

@@ -4,8 +4,6 @@
 	let isDropdownOpen = false;
 
 	function handleToggleDropDown() {
-		console.log('clicked');
-
 		isDropdownOpen = !isDropdownOpen;
 	}
 </script>

@@ -78,7 +78,6 @@
 				}
 			}
 		});
-		console.log('markerPosition', markerPosition);
 	}
 </script>
 

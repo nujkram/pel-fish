@@ -12,8 +12,6 @@
 	let isLogout = false;
 
 	function handleToggleDropDown() {
-		console.log('clicked');
-
 		isDropdownOpen = !isDropdownOpen;
 	}
 
