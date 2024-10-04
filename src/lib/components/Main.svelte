@@ -43,6 +43,7 @@
 	let currentRecord: any;
 	let leafletMap: any;
 	let markerPosition: { coord: [number, number]; name: string; id: string }[] = [];
+	let mapInitialized = false;
 
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
@@ -170,6 +171,11 @@
 							}
 						}
 					});
+
+					mapInitialized = markerPosition.length > 0;
+				} else {
+					markerPosition = [];
+					mapInitialized = false;
 				}
 
 				pageMinIndex = paginatedItems.length == 0 ? 0 : 1 + (currentPage - 1) * pageSize;
@@ -179,9 +185,20 @@
 						: pageSize * currentPage;
 			} catch (error: any) {
 				console.error('error', error);
+				mapInitialized = false;
 			}
 		}
 	}
+
+	const initializeMap = () => {
+		if (leafletMap) {
+			leafletMap.invalidateSize();
+			if (markerPosition.length > 0) {
+				const bounds = L.latLngBounds(markerPosition.map(marker => marker.coord));
+				leafletMap.fitBounds(bounds);
+			}
+		}
+	};
 </script>
 
 <div class="p-4 border-2 border-gray-200 bg-gray-50 rounded-lg dark:border-gray-700">
@@ -344,9 +361,9 @@
 				</div>
 			</div>
 			<div class="h-screen w-full">
-				{#key paginatedItems}
-					{#if markerPosition.length}
-						<LeafletMap this={leafletMap} options={mapOptions}>
+				{#key mapInitialized}
+					{#if mapInitialized}
+						<LeafletMap bind:this={leafletMap} options={mapOptions} on:ready={initializeMap}>
 							<TileLayer url={tileUrl} options={tileLayerOptions} />
 							{#each markerPosition as marker}
 								<Marker latLng={marker.coord}>
@@ -356,7 +373,7 @@
 						</LeafletMap>
 					{:else}
 						<div class="flex w-full h-full">
-							<p class="m-auto">Map failed to load.</p>
+							<p class="m-auto">No markers available to display on the map.</p>
 						</div>
 					{/if}
 				{/key}

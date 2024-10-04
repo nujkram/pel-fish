@@ -109,7 +109,7 @@
 					<p class="text-gray-500 dark:text-gray-400">Total Records</p>
 				</div>
 			</div>
-			<div class="h-screen w-full">
+			<div class="h-screen w-full z-0">
 				{#key markerPosition}
 					<LeafletMap this={leafletMap} options={mapOptions}>
 						<TileLayer url={tileUrl} options={tileLayerOptions} />
