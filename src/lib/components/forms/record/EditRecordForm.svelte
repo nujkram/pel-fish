@@ -168,7 +168,7 @@
 	});
 </script>
 
-<div class="fixed z-10 inset-0 overflow-y-auto {isEditModalOpen ? 'block' : 'hidden'}">
+<div class="fixed z-50 inset-0 overflow-y-auto {isEditModalOpen ? 'block' : 'hidden'}">
   <div class="flex items-center justify-center p-4">
     <div class="fixed inset-0 bg-gray-800 bg-opacity-25" />
     <div class="relative z-50 h-[600px] mt-16 overflow-auto bg-white rounded-lg shadow-xl w-full max-w-6xl">
