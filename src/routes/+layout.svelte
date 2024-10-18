@@ -5,6 +5,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import FrontNav from '$lib/components/FrontNav.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 	// $: {
 	// 	if (!$page.data.user) {
 	// 		redirect();
@@ -28,3 +29,4 @@
 		<slot />
 	{/if}
 </main>
+<Footer />
