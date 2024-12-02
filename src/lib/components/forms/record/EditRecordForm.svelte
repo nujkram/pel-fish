@@ -88,36 +88,42 @@
 
 	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
-		const response = await fetch('/api/admin/record/update', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				_id,
-				scientific_name,
-				name,
-				local_name,
-				environment,
-				distribution,
-				maturity,
-				max,
-				description,
-				biology,
-				life,
-				reference,
-				country,
-				municipality,
-				barangay,
-				threat,
-				uses,
-				latitude,
-				longitude,
-				image: imageBase64
-			})
-		});
-		const result = await response.json();
-		isEditModalOpen = false;
+		
+		try {
+			const response = await fetch('/api/admin/record/update', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					_id,
+					scientific_name,
+					name,
+					local_name,
+					environment,
+					distribution,
+					maturity,
+					max,
+					description,
+					biology,
+					life,
+					reference,
+					country,
+					municipality,
+					barangay,
+					threat,
+					uses,
+					latitude,
+					longitude,
+					image: imageBase64
+				})
+			});
+			const result = await response.json();
+			isEditModalOpen = false;
+			location.reload();
+		} catch (error) {
+			console.error("Submission error:", error);
+		}
 	};
 
 	const uploadImage = (e: Event): void => {
@@ -244,7 +250,7 @@
                 name="maturity"
                 id="maturity"
                 bind:value={maturity}
-                required
+                
               />
             </div>
             <div>
@@ -255,7 +261,7 @@
                 name="max"
                 id="max"
                 bind:value={max}
-                required
+                
               />
             </div>
           </div>
@@ -268,7 +274,7 @@
               name="distribution"
               rows="3"
               bind:value={distribution}
-              required
+              
             ></textarea>
           </div>
 
@@ -292,7 +298,7 @@
               name="biology"
               rows="5"
               bind:value={biology}
-              required
+              
             ></textarea>
           </div>
 
@@ -304,7 +310,7 @@
               name="life"
               rows="5"
               bind:value={life}
-              required
+              
             ></textarea>
           </div>
 
@@ -316,7 +322,7 @@
               name="reference"
               id="reference"
               bind:value={reference}
-              required
+              
             />
           </div>
 
@@ -379,7 +385,7 @@
               name="uses"
               id="uses"
               bind:value={uses}
-              required
+              
             />
           </div>
 
@@ -391,7 +397,7 @@
               name="latitude"
               id="latitude"
               bind:value={latitude}
-              required
+              
             />
           </div>
 
@@ -403,7 +409,7 @@
               name="longitude"
               id="longitude"
               bind:value={longitude}
-              required
+              
             />
           </div>
 
@@ -421,7 +427,7 @@
           </div>
 
           <div class="md:col-span-2">
-            <Button type="submit" class="w-full" text="Update">Update</Button>
+            <Button type="submit" class="w-full" text="Update" />
           </div>
         </form>
       </div>

@@ -65,10 +65,29 @@
 	}
 </script>
 
-{#if type === 'button'}
+{#if type === 'submit'}
 	<button
 		type="submit"
-		class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
+		class="{bgColor} {textColor} {textSize} {padding} {rounded} {margin} {classes}"
+		on:mouseenter={() => {
+			active = true;
+			active ? (bgColor = hoverColor) : (bgColor = defaultColor);
+		}}
+		on:mouseleave={() => {
+			active = true;
+			active ? (bgColor = defaultColor) : (bgColor = hoverColor);
+		}}
+		on:click={click}
+	>
+		<span class="flex gap-1">
+			<slot />
+			{text}
+		</span>
+	</button>
+{:else if type === 'button'}
+	<button
+		type="button"
+		class="{bgColor} {textColor} {textSize} {padding} {rounded} {margin} {classes}"
 		on:mouseenter={() => {
 			active = true;
 			active ? (bgColor = hoverColor) : (bgColor = defaultColor);
@@ -87,7 +106,7 @@
 {:else}
 	<a
 		{href}
-		class="{bgColor} {textColor} {textSize}  {padding} {rounded} {margin} {classes}"
+		class="{bgColor} {textColor} {textSize} {padding} {rounded} {margin} {classes}"
 		on:mouseenter={() => {
 			active = true;
 			active ? (bgColor = hoverColor) : (bgColor = defaultColor);
