@@ -17,16 +17,18 @@
 	// }
 </script>
 
-<main id="content">
+<div class="min-h-screen flex flex-col">
 	{#if $page.data.user}
 		<Navbar data={$page.data} />
-		<Sidebar />
-		<main class="mt-16 ml-[16.5rem]">
-			<slot />
-		</main>
+		<div class="flex flex-1">
+			<Sidebar />
+			<main class="flex-1 mt-16 ml-64 mb-16">
+				<slot />
+			</main>
+		</div>
 	{:else}
 		<FrontNav />
 		<slot />
 	{/if}
-</main>
-<Footer />
+	<Footer />
+</div>
