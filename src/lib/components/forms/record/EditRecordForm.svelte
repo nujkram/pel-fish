@@ -243,14 +243,14 @@
               />
             </div>
             <div>
-              <label for="maturity" class="block text-sm font-medium text-gray-700">Maturity</label>
+              <label for="maturity" class="block text-sm font-medium text-gray-700">Maturity (cm)</label>
               <input
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 type="number"
                 name="maturity"
                 id="maturity"
                 bind:value={maturity}
-                
+                step="0.1"
               />
             </div>
             <div>
@@ -303,7 +303,7 @@
           </div>
 
           <div class="md:col-span-2">
-            <label for="life" class="block text-sm font-medium text-gray-700">Life</label>
+            <label for="life" class="block text-sm font-medium text-gray-700">Life Cycle and Mating Behavior</label>
             <textarea
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               id="life"

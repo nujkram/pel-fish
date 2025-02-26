@@ -9,6 +9,8 @@
 	import L from 'leaflet';
 	import { page } from '$app/stores';
 
+	export let data: any;
+
 	let recordId: string;
 	let leafletMap: any;
 	let markers: L.Marker[] = [];
@@ -23,48 +25,44 @@
 	const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	const tileLayerOptions = {
 		minZoom: 0,
-		maxZoom: 9,
+		maxZoom: 21,
 		maxNativeZoom: 19,
 	};
 
 	onMount(async (): Promise<void> => {
-		recordId = $page.params.recordId;
-		await fetchMarkerData();
+		markerCoordinates = data.markers;
 
 		const map = leafletMap.getMap();
 		map.on('click', handleMapClick);
 
 		// Add existing markers
-		markerCoordinates.forEach((coord) => {
-			const marker = L.marker(coord).addTo(map);
-			marker.on('click', () => handleMarkerClick(marker));
-			markers = [...markers, marker];
-		});
+		for (const coord of markerCoordinates) {
+			addMarker(coord);
+		}
 	});
 
-	const fetchMarkerData = async (): Promise<void> => {
-		try {
-			const response = await fetch(`/api/admin/record/${recordId}/markers`);
-			const data = await response.json();
-			markerCoordinates = data.markers;
-		} catch (error) {
-			console.error('Error fetching marker data:', error);
-		}
+	
+
+	const addMarker = (coord: [number, number]) => {
+		const map = leafletMap.getMap();
+		const marker = L.marker(coord).addTo(map);
+		marker.on('click', () => handleMarkerClick(marker));
+		markers = [...markers, marker];
 	};
 
 	const handleMapClick = (e: L.LeafletMouseEvent) => {
 		if (e && e.latlng) {
-			const newMarker = L.marker(e.latlng).addTo(leafletMap.getMap());
-			newMarker.on('click', () => handleMarkerClick(newMarker));
-			markers = [...markers, newMarker];
-			markerCoordinates = [...markerCoordinates, [e.latlng.lat, e.latlng.lng]];
+			const coord: [number, number] = [e.latlng.lat, e.latlng.lng];
+			addMarker(coord);
+			markerCoordinates = [...markerCoordinates, coord];
 		} else {
 			console.warn('Invalid click event or location data:', e);
 		}
 	};
 
 	const handleMarkerClick = (clickedMarker: L.Marker) => {
-		leafletMap.getMap().removeLayer(clickedMarker);
+		const map = leafletMap.getMap();
+		map.removeLayer(clickedMarker);
 		const index = markers.indexOf(clickedMarker);
 		markers = markers.filter((marker) => marker !== clickedMarker);
 		markerCoordinates = markerCoordinates.filter((_, i) => i !== index);
@@ -72,7 +70,7 @@
 
 	const handleSubmit = async (): Promise<void> => {
 		try {
-			const response = await fetch(`/api/admin/record/update-marker`, {
+			const response = await fetch('/api/admin/record/update-marker', {
 				method: 'POST',
 				headers: {
 					'content-type': 'application/json'
@@ -96,12 +94,10 @@
 </script>
 
 <div class="border border-gray-200 rounded mr-4 p-8">
+	<h1 class="text-2xl font-bold mb-4">Update {data.name}</h1>
 	<div class="h-screen w-full mb-4">
 		<LeafletMap bind:this={leafletMap} options={mapOptions}>
 			<TileLayer url={tileUrl} options={tileLayerOptions} />
-			{#each markers as marker}
-				<Marker latLng={marker.getLatLng()} />
-			{/each}
 		</LeafletMap>
 	</div>
 
