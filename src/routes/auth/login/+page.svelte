@@ -146,8 +146,6 @@
 	</div>
 </section>
 
-
-
 <style>
 	@keyframes fade-in-left {
 		0% {

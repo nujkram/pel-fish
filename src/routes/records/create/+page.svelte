@@ -100,7 +100,7 @@
 	const tileLayerOptions = {
 		minZoom: 0,
 		maxZoom: 9,
-		maxNativeZoom: 19,
+		maxNativeZoom: 19
 	};
 
 	const handleMapClick = (e: L.LeafletMouseEvent) => {

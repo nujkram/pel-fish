@@ -95,10 +95,6 @@
 		sortItems(records, 'name', sort);
 	};
 
-	const handleOverFlow = () => {
-		if (pageMaxIndex > itemSize) currentPage -= 1;
-	};
-
 	const decrementPageNumber = () => {
 		if (currentPage > 1) {
 			currentPage -= 1;
@@ -117,7 +113,7 @@
 
 	const viewRecord = () => {
 		return () => {
-			goto(`records/${currentRecord._id}`);
+			goto(`fish/${currentRecord._id}`);
 		};
 	};
 
@@ -135,14 +131,18 @@
 								item.scientific_name && typeof item.scientific_name === 'string'
 									? item.scientific_name.match(new RegExp(search, 'gi'))
 									: false;
+							const localNameMatch =
+								item.local_name && typeof item.local_name === 'string'
+									? item.local_name.match(new RegExp(search, 'gi'))
+									: false;
 
 							if (status !== 'all') {
 								return (
-									(nameMatch || scientificNameMatch) && item.isActive === (status === 'active')
+									(nameMatch || scientificNameMatch || localNameMatch) &&
+									item.isActive === (status === 'active')
 								);
-							} else {
-								return nameMatch || scientificNameMatch;
 							}
+							return nameMatch || scientificNameMatch || localNameMatch;
 					  })
 					: records.filter((item: any) => {
 							return status !== 'all' ? item.isActive === (status === 'active') : true;
@@ -153,24 +153,24 @@
 					paginatedItems = paginate({ items: paginatedItems, pageSize, currentPage });
 
 					markerPosition = [];
-					paginatedItems.forEach((data: any) => {
+					for (const data of paginatedItems) {
 						if (Array.isArray(data.markers) && data.markers.length > 0) {
-							data.markers.forEach((marker: [number, number]) => {
+							for (const marker of data.markers) {
 								let lat: number = marker[0];
 								let lng: number = marker[1];
-								if (!isNaN(lat) && !isNaN(lng)) {
+								if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
 									markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
 								}
-							});
+							}
 						} else {
 							// Fallback to using latitude and longitude if markers array is empty or not present
-							let lat = parseFloat(data.latitude);
-							let lng = parseFloat(data.longitude);
-							if (!isNaN(lat) && !isNaN(lng)) {
+							let lat = Number.parseFloat(data.latitude);
+							let lng = Number.parseFloat(data.longitude);
+							if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
 								markerPosition.push({ coord: [lat, lng], name: data.name, id: data._id });
 							}
 						}
-					});
+					}
 
 					mapInitialized = markerPosition.length > 0;
 				} else {
@@ -194,7 +194,7 @@
 		if (leafletMap) {
 			leafletMap.invalidateSize();
 			if (markerPosition.length > 0) {
-				const bounds = L.latLngBounds(markerPosition.map(marker => marker.coord));
+				const bounds = L.latLngBounds(markerPosition.map((marker) => marker.coord));
 				leafletMap.fitBounds(bounds);
 			}
 		}
@@ -272,14 +272,14 @@
 								</th>
 								<th scope="col" class="pl-6">
 									<div class="flex my-auto gap-0">
-										Scientific Name <Sort
-											on:click={() => handleSort('scientific_name', sortOrder)}
-										/>
+										Local Name <Sort on:click={() => handleSort('scientific_name', sortOrder)} />
 									</div>
 								</th>
 								<th scope="col" class="pl-6">
 									<div class="flex my-auto gap-0">
-										Country <Sort on:click={() => handleSort('country', sortOrder)} />
+										Scientific Name <Sort
+											on:click={() => handleSort('scientific_name', sortOrder)}
+										/>
 									</div>
 								</th>
 							</tr>
@@ -305,12 +305,12 @@
 											<td
 												class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
 											>
-												{item.scientific_name || 'NA'}
+												{item.local_name || 'NA'}
 											</td>
 											<td
 												class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
 											>
-												{item.country || 'NA'}
+												{item.scientific_name || 'NA'}
 											</td>
 										</tr>
 									{/each}

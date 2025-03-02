@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDateMDY } from '$lib/utils/dateHelper';
 	import 'leaflet/dist/leaflet.css';
 	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
 

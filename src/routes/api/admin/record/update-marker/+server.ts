@@ -1,7 +1,13 @@
 import clientPromise from '$lib/server/mongo';
 
 /** @type {import('./$types').RequestHandler} */
-export const POST = async ({ request, locals }: { request: Request; locals: any }): Promise<Response> => {
+export const POST = async ({
+	request,
+	locals
+}: {
+	request: Request;
+	locals: any;
+}): Promise<Response> => {
 	const data = await request.json();
 	const db = await clientPromise();
 	const Record = db.collection('records');

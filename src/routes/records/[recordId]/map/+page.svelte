@@ -26,7 +26,7 @@
 	const tileLayerOptions = {
 		minZoom: 0,
 		maxZoom: 21,
-		maxNativeZoom: 19,
+		maxNativeZoom: 19
 	};
 
 	onMount(async (): Promise<void> => {
@@ -40,8 +40,6 @@
 			addMarker(coord);
 		}
 	});
-
-	
 
 	const addMarker = (coord: [number, number]) => {
 		const map = leafletMap.getMap();
@@ -75,9 +73,9 @@
 				headers: {
 					'content-type': 'application/json'
 				},
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					_id: recordId,
-					markers: markerCoordinates 
+					markers: markerCoordinates
 				})
 			});
 

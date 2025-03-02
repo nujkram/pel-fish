@@ -22,7 +22,7 @@
 		<Navbar data={$page.data} />
 		<div class="flex flex-1">
 			<Sidebar />
-			<main class="flex-1 mt-16 ml-64 mb-16">
+			<main class="flex-1 mt-16 ml-32 mb-16">
 				<slot />
 			</main>
 		</div>

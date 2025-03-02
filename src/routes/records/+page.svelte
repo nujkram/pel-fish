@@ -1,7 +1,6 @@
 <script>
 	// @ts-nocheck
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { paginate } from 'svelte-paginate';
 	import Button from '$lib/components/reusable/Button.svelte';
 	import EditRecordForm from '$lib/components/forms/record/EditRecordForm.svelte';
@@ -12,9 +11,11 @@
 	import Eye from '$lib/components/icons/Eye.svelte';
 	import LiveBuoy from '$lib/components/icons/LiveBuoy.svelte';
 
+	export let data;
+
 	let status = 'all';
 	let search;
-	let items = [];
+	let items = data.records;
 	let currentPage = 1;
 	let pageSize = 10;
 	let itemSize;
@@ -27,36 +28,33 @@
 	let isEditModalOpen = false;
 	let isConfirmModalOpen = false;
 
+	// Add new variables for enhanced filtering
+	let selectedFilters = {
+		threat: 'all',
+		country: 'all'
+	};
+
+	let uniqueCountries = [...new Set(items.map((item) => item.country))].filter(Boolean);
+
 	// Modals
 	const handleEditModal = () => (isEditModalOpen = !isEditModalOpen);
 	const handleConfirmDeleteModal = () => (isConfirmModalOpen = !isConfirmModalOpen);
 
 	function currentRecordExist() {
-		if (currentRecord === undefined || !items.includes(currentRecord)) {
-			log.error('Selected record does not exist in items fetch from database!');
+		if (currentRecord === undefined) {
+			console.error('Selected record is undefined!');
 			return false;
 		}
 
-		if (record.code === '' || record.description === '') {
+		if (!items.some((item) => item._id === currentRecord._id)) {
+			console.error('Selected record does not exist in items fetch from database!');
+			return false;
+		}
+
+		if (currentRecord.name === '' || currentRecord.description === '') {
 			return false;
 		}
 		return true;
-	}
-
-	async function loadRecord() {
-		try {
-			let response = await fetch('/api/admin/record', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			let result = await response.json();
-			items = result.response;
-			sortItems();
-		} catch (error) {
-			console.error('error', error);
-		}
 	}
 
 	function sortItems() {
@@ -89,265 +87,341 @@
 		if (pageMaxIndex < itemSize) currentPage += 1;
 	};
 
-	onMount(async () => {
-		loadRecord();
-	});
 	$: {
-		// Prevent user to input below the minimum or beyond the maximum value of pagesize.
+		// Prevent user to input below the minimum value of pagesize
 		if (pageSize < 1) pageSize = 1;
-		// reactive statement to automatically filter data based on status.
-		paginatedItems = search
-			? items.filter((record) => {
-					return status !== 'all'
-						? record.name.match(RegExp(search, 'gi')) || record.isActive === (status === 'active')
-						: record.name.match(RegExp(search, 'gi'));
-			  })
-			: items.filter((record) => {
-					return status !== 'all' ? record.isActive === (status === 'active') : items;
-			  });
-		if (paginatedItems.length) {
-			itemSize = paginatedItems.length;
-			paginatedItems = paginate({ items: paginatedItems, pageSize, currentPage });
+
+		// Filter items based on search and status
+		if (items) {
+			try {
+				paginatedItems = search
+					? items.filter((item) => {
+							const nameMatch =
+								item.name && typeof item.name === 'string'
+									? item.name.match(new RegExp(search, 'gi'))
+									: false;
+							const localNameMatch =
+								item.local_name && typeof item.local_name === 'string'
+									? item.local_name.match(new RegExp(search, 'gi'))
+									: false;
+							const countryMatch =
+								item.country && typeof item.country === 'string'
+									? item.country.match(new RegExp(search, 'gi'))
+									: false;
+
+							if (status !== 'all') {
+								return (
+									(nameMatch || localNameMatch || countryMatch) &&
+									item.isActive === (status === 'active')
+								);
+							}
+							return nameMatch || localNameMatch || countryMatch;
+					  })
+					: items.filter((item) => {
+							return status !== 'all' ? item.isActive === (status === 'active') : true;
+					  });
+
+				if (paginatedItems.length) {
+					itemSize = paginatedItems.length;
+					paginatedItems = paginate({ items: paginatedItems, pageSize, currentPage });
+				}
+
+				pageMinIndex = paginatedItems.length == 0 ? 0 : 1 + (currentPage - 1) * pageSize;
+				pageMaxIndex =
+					pageSize * currentPage > paginatedItems.length
+						? paginatedItems.length
+						: pageSize * currentPage;
+			} catch (error) {
+				console.error('error', error);
+			}
 		}
-		pageMinIndex = paginatedItems.length == 0 ? 0 : 1 + (currentPage - 1) * pageSize;
-		pageMaxIndex =
-			pageSize * currentPage > paginatedItems.length
-				? paginatedItems.length
-				: pageSize * currentPage;
 	}
+
+	const loadRecord = async () => {
+		try {
+			// Update items directly from data.records
+			items = data.records;
+			// Re-sort items if needed
+			sortItems();
+			// Reset pagination to first page
+			currentPage = 1;
+		} catch (error) {
+			console.error('Error loading records:', error);
+		}
+	};
 </script>
 
-<div class="border-2 border-gray-100 rounded-lg h-auto dark:border-gray-700 mt-12">
-	<div class="flex flex-col justify-center border-b h-fit rounded bg-blue-600 dark:bg-gray-800">
-		<div class="flex flex-col px-5 justify-center py-4">
-			<span class="text-xl font-semibold" style="color:white">Manage Records</span>
-		</div>
-		<div class="flex gap-4 h-auto px-5 py-5 bg-white dark:bg-gray-800">
-			<div class="flex flex-col w-full h-auto">
-				<label
-					for="status"
-					class="block mb-2 pl-1 text-m font-semibold text-gray-900 dark:text-white">Status</label
+<div class="container mx-auto px-4 py-8">
+	<!-- Header Section -->
+	<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+		<h1 class="text-2xl font-bold text-gray-800 mb-4">Manage Records</h1>
+
+		<!-- Filters and Actions Row -->
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+			<!-- Status Filter -->
+			<div>
+				<div class="block text-sm font-medium text-gray-700 mb-2">Status</div>
+				<select
+					bind:value={status}
+					class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 				>
-				<div class="grid grid-cols-9">
-					<select
-						id="status"
-						bind:value={status}
-						class=" bg-gray-50 border border-gray-300 font-semibold text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-					>
-						<option class="text-gray-900 text-sm font-semibold" value="all" selected>All</option>
-						<option class="text-green-600 text-sm font-semibold" value="active"> Active</option>
-						<option class="text-red-500 text-sm font-semibold" value="inactive">Inactive</option>
-					</select>
-					<div class="flex ml-2 gap-4">
-						<Button
-							color="success"
-							textSize="text-md"
-							text="Create"
-							type="link"
-							href="/records/create"
-						/>
-						<Button
-							color="primary"
-							textSize="text-md"
-							text="Import"
-							type="link"
-							href="/records/import"
-						/>
-					</div>
-					<div class="col-start-7 col-span-3 rounded">
-						<form class="flex items-center">
-							<label for="search" class="sr-only">Search</label>
-							<div class="relative w-full">
-								<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-									<svg
-										aria-hidden="true"
-										class="w-5 h-5 text-gray-500 dark:text-gray-400"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-										><path
-											fill-rule="evenodd"
-											d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-											clip-rule="evenodd"
-										/></svg
-									>
-								</div>
-								<input
-									type="search"
-									bind:value={search}
-									id="search"
-									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									placeholder="Search"
-									required
-								/>
-							</div>
-						</form>
-					</div>
+					<option value="all">All Status</option>
+					<option value="active" class="text-green-600">Active</option>
+					<option value="inactive" class="text-red-500">Inactive</option>
+				</select>
+			</div>
+
+			<!-- Threat Level Filter -->
+			<div>
+				<div class="block text-sm font-medium text-gray-700 mb-2">Threat Level</div>
+				<select
+					bind:value={selectedFilters.threat}
+					class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+				>
+					<option value="all">All Threats</option>
+					<option value="Harmless">Harmless</option>
+					<option value="Potentially Harmless">Potentially Harmless</option>
+					<option value="Dangerous if Provoked">Dangerous if Provoked</option>
+					<option value="Extremely Dangerous">Extremely Dangerous</option>
+				</select>
+			</div>
+
+			<!-- Search Bar -->
+			<div>
+				<div class="block text-sm font-medium text-gray-700 mb-2">Search</div>
+				<div class="relative">
+					<input
+						type="search"
+						bind:value={search}
+						placeholder="Search records..."
+						class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pl-10"
+					/>
+					<span class="absolute left-3 top-1/2 -translate-y-1/2">
+						<svg
+							class="w-5 h-5 text-gray-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+							/>
+						</svg>
+					</span>
 				</div>
 			</div>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="flex flex-wrap gap-3">
+			<Button color="success" text="Create New Record" type="link" href="/records/create">
+				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+					/>
+				</svg>
+			</Button>
+			<Button color="primary" text="Import Records" type="link" href="/records/import">
+				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+					/>
+				</svg>
+			</Button>
 		</div>
 	</div>
-	<div class="flex items-center justify-center h-fit mb-1 rounded bg-gray-50 dark:bg-gray-800">
-		<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
-			<thead class="text-m text-gray-700 border-b bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
-				<tr>
-					<th scope="col" class="pl-6">
-						Common Name
-						<Sort on:click={() => handleSort('name')} />
-					</th>
-					<th scope="col" class="pl-6">
-						Country
-						<Sort on:click={() => handleSort('country')} />
-					</th>
-					<th scope="col" class="pl-6">
-						Threat to Humans
-						<Sort on:click={() => handleSort('threat')} />
-					</th>
-					<th scope="col" class="pl-6">
-						Status
-						<Sort on:click={() => handleSort('isActive')} />
-					</th>
-					<th scope="col" class="pl-6">
-						<div class="flex gap-2 w-max">
-							<label for="items" class="block text-m font-semibold text-gray-900 dark:text-white"
-								>No. of Entries</label
-							>
-							<input
-								type="number"
-								id="items"
-								bind:value={pageSize}
-								on:change={handleOverFlow}
-								class="w-16 h-4 text-sm text-center text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600"
-								placeholder=" "
-							/>
-						</div>
-					</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#key paginatedItems}
-					{#if paginatedItems.length}
-						{#each paginatedItems as data}
-							<tr
-								class=" bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-								on:mouseenter={() => {
-									if (currentRecord !== data) {
-										currentRecord = data;
-									}
-								}}
-							>
-								<td
-									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
-								>
-									{data.name || ''}
-								</td>
-								<td
-									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
-								>
-									{data.country || ''}
-								</td>
-								<td
-									class="px-6 py-4 text-gray-700 whitespace-nowrap dark:text-white text-m font-medium"
-								>
-									{data.threat || ''}
-								</td>
-								<td class="flex items-center px-6 py-4">
-									<div class="flex items-center">
-										<div
-											class={data.isActive
-												? 'h-2.5 w-2.5 rounded-full bg-green-500 mr-2'
-												: 'h-2.5 w-2.5 rounded-full bg-red-500 mr-2'}
-										/>
-										<div class="text-sm text-gray-700 font-medium">
-											{data.isActive ? 'Active' : 'Inactive'}
-										</div>
-									</div>
-								</td>
 
-								<td class="px-6 py-4 col-span-3">
-									<Button
-										color="primary"
-										textSize="text-md"
-										text="View"
-										on:click={() => {
-											goto(`/records/${currentRecord?._id}`);
-										}}
-									>
-										<Eye />
-									</Button>
-									<Button
-										color="warning"
-										textSize="text-md"
-										text="Update"
-										on:click={handleEditModal}
-									>
-										<Edit />
-									</Button>
-									<Button
-										color="warning"
-										textSize="text-md"
-										text="Add Map"
-										on:click={goto(`/records/${currentRecord?._id}/map`)}
-									>
-										<LiveBuoy />
-									</Button>
-									<Button
-										color="danger"
-										textSize="text-md"
-										text="Delete"
-										on:click={handleConfirmDeleteModal}
-									>
-										<Trash />
-									</Button>
-								</td>
-							</tr>
-						{/each}
-					{/if}
-				{/key}
-			</tbody>
-			<div class="flex flex-col items-center mt-2">
-				<span class="text-sm text-gray-700 dark:text-gray-400">
-					Showing <span class="font-semibold text-gray-900 dark:text-white">{pageMinIndex}</span> to
-					<span class="font-semibold text-gray-900 dark:text-white">{pageMaxIndex}</span>
-					of <span class="font-semibold text-gray-900 dark:text-white">{itemSize}</span> Entries
-				</span>
-				<div class="inline-flex mt-2 xs:mt-0">
-					<button
+	<!-- Records Table -->
+	<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+		<div class="overflow-x-auto">
+			<table class="w-full">
+				<thead class="bg-gray-50">
+					<tr>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+						>
+							Image
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+						>
+							Name & Details
+							<Sort on:click={() => handleSort('name')} />
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+						>
+							Location
+							<Sort on:click={() => handleSort('country')} />
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+						>
+							Threat Level
+							<Sort on:click={() => handleSort('threat')} />
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+						>
+							Status
+							<Sort on:click={() => handleSort('isActive')} />
+						</th>
+						<th
+							class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[280px]"
+						>
+							Actions
+						</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-gray-200">
+					{#each paginatedItems as data}
+						<tr class="hover:bg-gray-50">
+							<!-- Image -->
+							<td class="px-6 py-4 whitespace-nowrap">
+								<div class="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+									{#if data.image}
+										<img src={data.image} alt={data.name} class="h-full w-full object-cover" />
+									{:else}
+										<div class="h-full w-full flex items-center justify-center">
+											<LiveBuoy />
+										</div>
+									{/if}
+								</div>
+							</td>
+
+							<!-- Name & Details -->
+							<td class="px-6 py-4">
+								<div class="text-sm font-medium text-gray-900">{data.name}</div>
+								<div class="text-sm text-gray-500">{data.scientific_name}</div>
+								{#if data.local_name}
+									<div class="text-xs text-gray-400">Local: {data.local_name}</div>
+								{/if}
+							</td>
+
+							<!-- Location -->
+							<td class="px-6 py-4">
+								<div class="text-sm text-gray-900">{data.country || 'N/A'}</div>
+								{#if data.municipality}
+									<div class="text-xs text-gray-500">{data.municipality}</div>
+								{/if}
+							</td>
+
+							<!-- Threat Level -->
+							<td class="px-6 py-4">
+								<span
+									class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+									{data.threat === 'Harmless'
+										? 'bg-green-100 text-green-800'
+										: data.threat === 'Potentially Harmless'
+										? 'bg-blue-100 text-blue-800'
+										: data.threat === 'Dangerous if Provoked'
+										? 'bg-yellow-100 text-yellow-800'
+										: 'bg-red-100 text-red-800'}"
+								>
+									{data.threat || 'Unknown'}
+								</span>
+							</td>
+
+							<!-- Status -->
+							<td class="px-6 py-4">
+								<span
+									class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+									{data.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}"
+								>
+									{data.isActive ? 'Active' : 'Inactive'}
+								</span>
+							</td>
+
+							<!-- Actions -->
+							<td class="px-6 py-4 text-right space-x-2 flex">
+								<Button color="primary" text="View" on:click={() => goto(`/records/${data._id}`)}>
+									<Eye />
+								</Button>
+								<Button
+									color="warning"
+									text="Edit"
+									on:click={() => {
+										currentRecord = data;
+										handleEditModal();
+									}}
+								>
+									<Edit />
+								</Button>
+								<Button
+									color="warning"
+									text="Map"
+									on:click={() => goto(`/records/${data._id}/map`)}
+								>
+									<LiveBuoy />
+								</Button>
+								<Button
+									color="danger"
+									text="Delete"
+									on:click={() => {
+										currentRecord = data;
+										handleConfirmDeleteModal();
+									}}
+								>
+									<Trash />
+								</Button>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Pagination -->
+		<div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+			<div class="flex justify-between items-center">
+				<div class="text-sm text-gray-700">
+					Showing <span class="font-medium">{pageMinIndex}</span> to
+					<span class="font-medium">{pageMaxIndex}</span>
+					of{' '}
+					<span class="font-medium">{itemSize}</span> results
+				</div>
+				<div class="flex items-center space-x-2">
+					<input
+						type="number"
+						bind:value={pageSize}
+						on:change={handleOverFlow}
+						class="w-16 rounded border-gray-300 text-sm"
+						min="1"
+					/>
+					<span class="text-sm text-gray-700">per page</span>
+				</div>
+				<div class="flex space-x-2">
+					<Button
+						color="secondary"
+						text="Previous"
+						disabled={currentPage === 1}
 						on:click={decrementPageNumber}
-						class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-					>
-						<svg aria-hidden="true" class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-							<path
-								fill-rule="evenodd"
-								d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-						Prev
-					</button>
-					<button
+					/>
+					<Button
+						color="secondary"
+						text="Next"
+						disabled={pageMaxIndex >= itemSize}
 						on:click={incrementPageNumber}
-						class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-					>
-						Next
-						<svg aria-hidden="true" class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
-							<path
-								fill-rule="evenodd"
-								d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-					</button>
+					/>
 				</div>
 			</div>
-		</table>
+		</div>
 	</div>
 </div>
 
-{#if currentRecordExist}
-	{#if isEditModalOpen}
-		<EditRecordForm bind:isEditModalOpen bind:currentRecord />
-	{/if}
-	{#if isConfirmModalOpen}
-		<DeleteRecordForm bind:isConfirmModalOpen {currentRecord} {loadRecord} />
-	{/if}
+<!-- Modals -->
+{#if isEditModalOpen}
+	<EditRecordForm bind:isEditModalOpen bind:currentRecord />
+{/if}
+{#if isConfirmModalOpen}
+	<DeleteRecordForm bind:isConfirmModalOpen {currentRecord} {loadRecord} />
 {/if}
