@@ -2,6 +2,10 @@
 	import 'leaflet/dist/leaflet.css';
 	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
 	import L from 'leaflet';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import Button from '$lib/components/reusable/Button.svelte';
+	import Edit from '$lib/components/icons/Edit.svelte';
 
 	export let data;
 	let { record } = data;
@@ -32,16 +36,20 @@
 		if (leafletMap && mapInitialized) {
 			const map = leafletMap.getMap();
 			map.invalidateSize();
-			if (Array.isArray(record.markers) && record.markers.length > 0) {
-				const bounds = L.latLngBounds(record.markers);
-				map.fitBounds(bounds.pad(0.5), { maxZoom: 10 });
-			} else if (record.latitude && record.longitude) {
-				const lat = Number.parseFloat(record.latitude);
-				const lng = Number.parseFloat(record.longitude);
-				if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-					map.setView([lat, lng], 10);
+			
+			// Use whenReady to ensure map is fully initialized
+			map.whenReady(() => {
+				if (Array.isArray(record.markers) && record.markers.length > 0) {
+					const bounds = L.latLngBounds(record.markers);
+					map.fitBounds(bounds.pad(0.3), { maxZoom: 10 });
+				} else if (record.latitude && record.longitude) {
+					const lat = Number.parseFloat(record.latitude);
+					const lng = Number.parseFloat(record.longitude);
+					if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+						map.setView([lat, lng], 10);
+					}
 				}
-			}
+			});
 		}
 	};
 </script>
@@ -97,21 +105,35 @@
 			{/each}
 
 			{#if mapInitialized}
-				<div class="h-96 w-full mb-6">
-					<LeafletMap bind:this={leafletMap} options={mapOptions} on:ready={initializeMap}>
-						<TileLayer url={tileUrl} options={tileLayerOptions} />
-						{#if Array.isArray(record.markers) && record.markers.length > 0}
-							{#each record.markers as marker}
-								<Marker latLng={marker}>
+				<div class="mb-6">
+					<div class="flex justify-between mb-4">
+						<h2 class="text-xl font-semibold text-gray-800 flex-auto">Location</h2>
+						<Button
+							type="button"
+							on:click={() => goto(`/records/${$page.params.recordId}/map`)}
+							color="bg-blue-500"
+							textSize="text-sm"
+							text="Edit Markers"
+						>
+							<Edit />
+						</Button>
+					</div>
+					<div class="h-96 w-full">
+						<LeafletMap bind:this={leafletMap} options={mapOptions} on:ready={initializeMap}>
+							<TileLayer url={tileUrl} options={tileLayerOptions} />
+							{#if Array.isArray(record.markers) && record.markers.length > 0}
+								{#each record.markers as marker}
+									<Marker latLng={marker}>
+										<Popup>{record.name}</Popup>
+									</Marker>
+								{/each}
+							{:else if record.latitude && record.longitude}
+								<Marker latLng={[Number(record.latitude), Number(record.longitude)]}>
 									<Popup>{record.name}</Popup>
 								</Marker>
-							{/each}
-						{:else if record.latitude && record.longitude}
-							<Marker latLng={[Number(record.latitude), Number(record.longitude)]}>
-								<Popup>{record.name}</Popup>
-							</Marker>
-						{/if}
-					</LeafletMap>
+							{/if}
+						</LeafletMap>
+					</div>
 				</div>
 			{/if}
 
