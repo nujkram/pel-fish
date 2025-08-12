@@ -1,6 +1,7 @@
 <script lang="ts">
 	import 'leaflet/dist/leaflet.css';
 	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
+	import L from 'leaflet';
 
 	export let data;
 	let { record } = data;
@@ -29,15 +30,16 @@
 
 	const initializeMap = () => {
 		if (leafletMap && mapInitialized) {
-			leafletMap.invalidateSize();
+			const map = leafletMap.getMap();
+			map.invalidateSize();
 			if (Array.isArray(record.markers) && record.markers.length > 0) {
 				const bounds = L.latLngBounds(record.markers);
-				leafletMap.fitBounds(bounds);
+				map.fitBounds(bounds.pad(0.5), { maxZoom: 10 });
 			} else if (record.latitude && record.longitude) {
 				const lat = Number.parseFloat(record.latitude);
 				const lng = Number.parseFloat(record.longitude);
 				if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-					leafletMap.setView([lat, lng]);
+					map.setView([lat, lng], 10);
 				}
 			}
 		}

@@ -17,6 +17,8 @@
 	let markerCoordinates: [number, number][] = [];
 	let message: string = '';
 
+	$: recordId = $page.params.recordId;
+
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
 		zoom: 11,
@@ -30,7 +32,7 @@
 	};
 
 	onMount(async (): Promise<void> => {
-		markerCoordinates = data.markers;
+		markerCoordinates = data.markers || [];
 
 		const map = leafletMap.getMap();
 		map.on('click', handleMapClick);
@@ -38,6 +40,12 @@
 		// Add existing markers
 		for (const coord of markerCoordinates) {
 			addMarker(coord);
+		}
+
+		// Focus on markers if they exist
+		if (markerCoordinates.length > 0) {
+			const group = new L.FeatureGroup(markers);
+			map.fitBounds(group.getBounds().pad(0.5), { maxZoom: 10 });
 		}
 	});
 
@@ -93,13 +101,7 @@
 
 <div class="border border-gray-200 rounded mr-4 p-8">
 	<h1 class="text-2xl font-bold mb-4">Update {data.name}</h1>
-	<div class="h-screen w-full mb-4">
-		<LeafletMap bind:this={leafletMap} options={mapOptions}>
-			<TileLayer url={tileUrl} options={tileLayerOptions} />
-		</LeafletMap>
-	</div>
-
-	<div class="md:flex md:items-center">
+	<div class="md:flex md:items-center mb-4">
 		<div class="md:w-3/12" />
 		<div class="md:w-9/12 text-right">
 			<Button
@@ -113,6 +115,13 @@
 			</Button>
 		</div>
 	</div>
+	<div class="h-screen w-full">
+		<LeafletMap bind:this={leafletMap} options={mapOptions}>
+			<TileLayer url={tileUrl} options={tileLayerOptions} />
+		</LeafletMap>
+	</div>
+
+	
 
 	{#if message}
 		<div
