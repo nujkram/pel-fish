@@ -5,7 +5,6 @@ import { ObjectId } from 'mongodb';
 export async function GET({ params }) {
 	try {
 		const { recordId } = params;
-		console.log('Received recordId:', recordId);
 
 		if (!recordId) {
 			return new Response(
@@ -25,15 +24,8 @@ export async function GET({ params }) {
 		const db = await clientPromise();
 		const Records = db.collection('records');
 
-		console.log('Searching for record with _id:', recordId);
-
 		// Find the specific record including the image
 		const response = await Records.findOne({ _id: recordId });
-
-		console.log('Found record:', response ? 'YES' : 'NO');
-		if (response) {
-			console.log('Record _id:', response._id);
-		}
 
 		if (!response) {
 			return new Response(
