@@ -13,7 +13,7 @@ const options = {
 let cachedDb: any;
 
 if (!uri) {
-	throw new Error('Please DATABASE_URL to your environment');
+	throw new Error('Please set DATABASE_URL in your environment');
 }
 
 if (dev && !uri?.includes('Staging') && !uri?.includes('Test')) {
@@ -29,13 +29,9 @@ async function connectToDatabase() {
 
 	const client = await MongoClient.connect(uri, options);
 
-	const currentDb = uri?.includes('Staging')
-		? 'PelFishStaging'
-		: uri?.includes('Test')
-		? 'PelFishStagingTest'
-		: 'PelFishStaging';
-
-	const db = await client.db(currentDb);
+	// Use explicit override if provided; otherwise use the DB in the URI
+	const dbNameOverride = process.env['MONGODB_DB'] || process.env['DATABASE_NAME'];
+	const db = dbNameOverride ? client.db(dbNameOverride) : client.db();
 	cachedDb = db;
 	return db;
 }

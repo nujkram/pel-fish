@@ -121,8 +121,6 @@
 		</LeafletMap>
 	</div>
 
-	
-
 	{#if message}
 		<div
 			transition:fade

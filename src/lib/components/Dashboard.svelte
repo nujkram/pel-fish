@@ -111,7 +111,7 @@
 			</div>
 			<div class="h-screen w-full z-0">
 				{#key markerPosition}
-					<LeafletMap this={leafletMap} options={mapOptions}>
+					<LeafletMap bind:this={leafletMap} options={mapOptions}>
 						<TileLayer url={tileUrl} options={tileLayerOptions} />
 						{#each markerPosition as marker}
 							<Marker latLng={marker.coord}>

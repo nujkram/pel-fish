@@ -14,6 +14,8 @@ export async function GET({ url }) {
 
 		const response = await Records.find({}).sort({ created: -1 }).project(projection).toArray();
 
+		// Intentionally no console logging in production build
+
 		return new Response(
 			JSON.stringify({
 				status: 'Success',
@@ -28,7 +30,7 @@ export async function GET({ url }) {
 			}
 		);
 	} catch (error) {
-		console.error('API Error:', error);
+		console.error('[api/admin/record] API Error:', error);
 		return new Response(
 			JSON.stringify({
 				status: 'Error',

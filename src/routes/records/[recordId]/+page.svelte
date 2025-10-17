@@ -36,7 +36,7 @@
 		if (leafletMap && mapInitialized) {
 			const map = leafletMap.getMap();
 			map.invalidateSize();
-			
+
 			// Use whenReady to ensure map is fully initialized
 			map.whenReady(() => {
 				if (Array.isArray(record.markers) && record.markers.length > 0) {

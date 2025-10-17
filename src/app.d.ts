@@ -10,3 +10,7 @@ declare global {
 }
 
 export {};
+
+// Ambient module declarations for libraries without types
+declare module 'svelte-leafletjs';
+declare module 'leaflet';

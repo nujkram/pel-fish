@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
+	import L from 'leaflet';
 	import { paginate } from 'svelte-paginate';
 	import Sort from './reusable/Sort.svelte';
 	import { goto } from '$app/navigation';
@@ -30,12 +31,12 @@
 		_id: string;
 	}
 
-	let records: Fish[];
+	let records: Fish[] = [];
 	let status = 'all';
 	let search: string;
 	let currentPage: number = 1;
 	let pageSize: number = 10;
-	let itemSize: number;
+	let itemSize: number = 0;
 	let paginatedItems: any = [];
 	let pageMinIndex: number = 1;
 	let pageMaxIndex: number = pageSize;
@@ -73,8 +74,17 @@
 	};
 
 	onMount(async () => {
-		records = await fetchData('/api/admin/record');
-		sortItems(records, 'name', 'asc');
+		try {
+			const data = await fetchData('/api/admin/record');
+			if (data && Array.isArray(data)) {
+				records = data;
+				sortItems(records, 'name', 'asc');
+			} else {
+				console.error('Data is not an array:', data);
+			}
+		} catch (error) {
+			console.error('Error in onMount:', error);
+		}
 	});
 
 	const sortItems = (fish: Fish[], sortBy: keyof Fish, sortOrder: string) => {

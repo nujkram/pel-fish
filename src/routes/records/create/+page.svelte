@@ -7,7 +7,6 @@
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
 	import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
 	import L from 'leaflet';
-
 	let scientific_name: string = '';
 	let name: string = '';
 	let local_name: string = '';

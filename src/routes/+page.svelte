@@ -1,10 +1,13 @@
 <script>
-	import { page } from '$app/stores';
 	import Dashboard from '$lib/components/Dashboard.svelte';
 	import Main from '$lib/components/Main.svelte';
+
+	export let data;
+	export let form;
+	$: void form;
 </script>
 
-{#if $page.data.user}
+{#if data?.user}
 	<Dashboard />
 {:else}
 	<Main />

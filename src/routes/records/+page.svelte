@@ -13,6 +13,8 @@
 
 	export let data;
 
+	$: isLoggedIn = !!data.user;
+
 	let status = 'all';
 	let search;
 	let items = data.records;
@@ -215,29 +217,31 @@
 			</div>
 		</div>
 
-		<!-- Action Buttons -->
-		<div class="flex flex-wrap gap-3">
-			<Button color="success" text="Create New Record" type="link" href="/records/create">
-				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-					/>
-				</svg>
-			</Button>
-			<Button color="primary" text="Import Records" type="link" href="/records/import">
-				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-					/>
-				</svg>
-			</Button>
-		</div>
+		<!-- Action Buttons (Admin Only) -->
+		{#if isLoggedIn}
+			<div class="flex flex-wrap gap-3">
+				<Button color="success" text="Create New Record" type="link" href="/records/create">
+					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+						/>
+					</svg>
+				</Button>
+				<Button color="primary" text="Import Records" type="link" href="/records/import">
+					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+						/>
+					</svg>
+				</Button>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Records Table -->
@@ -275,11 +279,19 @@
 							Status
 							<Sort on:click={() => handleSort('isActive')} />
 						</th>
-						<th
-							class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[280px]"
-						>
-							Actions
-						</th>
+						{#if isLoggedIn}
+							<th
+								class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[280px]"
+							>
+								Actions
+							</th>
+						{:else}
+							<th
+								class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+							>
+								Actions
+							</th>
+						{/if}
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200">
@@ -346,33 +358,35 @@
 								<Button color="primary" text="View" on:click={() => goto(`/records/${data._id}`)}>
 									<Eye />
 								</Button>
-								<Button
-									color="warning"
-									text="Edit"
-									on:click={() => {
-										currentRecord = data;
-										handleEditModal();
-									}}
-								>
-									<Edit />
-								</Button>
-								<Button
-									color="warning"
-									text="Map"
-									on:click={() => goto(`/records/${data._id}/map`)}
-								>
-									<LiveBuoy />
-								</Button>
-								<Button
-									color="danger"
-									text="Delete"
-									on:click={() => {
-										currentRecord = data;
-										handleConfirmDeleteModal();
-									}}
-								>
-									<Trash />
-								</Button>
+								{#if isLoggedIn}
+									<Button
+										color="warning"
+										text="Edit"
+										on:click={() => {
+											currentRecord = data;
+											handleEditModal();
+										}}
+									>
+										<Edit />
+									</Button>
+									<Button
+										color="warning"
+										text="Map"
+										on:click={() => goto(`/records/${data._id}/map`)}
+									>
+										<LiveBuoy />
+									</Button>
+									<Button
+										color="danger"
+										text="Delete"
+										on:click={() => {
+											currentRecord = data;
+											handleConfirmDeleteModal();
+										}}
+									>
+										<Trash />
+									</Button>
+								{/if}
 							</td>
 						</tr>
 					{/each}
