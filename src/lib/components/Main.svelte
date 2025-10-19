@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import { LeafletMap, TileLayer, Marker, Popup } from 'svelte-leafletjs';
 	import L from 'leaflet';
@@ -66,26 +65,29 @@
 					'Content-Type': 'application/json'
 				}
 			});
+
 			let result = await response.json();
 			return result.response;
 		} catch (error) {
-			console.error('error', error);
+			console.error('fetchData: error', error);
+			throw error;
 		}
 	};
 
-	onMount(async () => {
-		try {
-			const data = await fetchData('/api/admin/record');
-			if (data && Array.isArray(data)) {
-				records = data;
-				sortItems(records, 'name', 'asc');
-			} else {
-				console.error('Data is not an array:', data);
-			}
-		} catch (error) {
-			console.error('Error in onMount:', error);
-		}
-	});
+	// Fetch data immediately when component loads (browser-only)
+	// Note: Using immediate fetch instead of onMount due to onMount not firing reliably
+	if (typeof window !== 'undefined') {
+		fetchData('/api/admin/record')
+			.then(data => {
+				if (data && Array.isArray(data)) {
+					records = data;
+					sortItems(records, 'name', 'asc');
+				}
+			})
+			.catch(error => {
+				console.error('Error fetching records:', error);
+			});
+	}
 
 	const sortItems = (fish: Fish[], sortBy: keyof Fish, sortOrder: string) => {
 		let order = sortOrder === 'asc' ? 1 : -1;

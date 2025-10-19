@@ -8,7 +8,6 @@ export async function load({ locals, params, url, parent }) {
 	}
 
 	const { user } = locals;
-	console.log(user);
 	return {
 		user
 	};

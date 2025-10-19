@@ -40,7 +40,8 @@
 			let result = await response.json();
 			return result.response;
 		} catch (error) {
-			console.error('error', error);
+			console.error('Dashboard: error fetching', path, ':', error);
+			return [];
 		}
 	}
 
