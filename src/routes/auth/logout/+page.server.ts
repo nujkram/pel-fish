@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies, locals }) => {
@@ -11,4 +12,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
 
 	// clear the session
 	locals.user = null;
+
+	// redirect to login page
+	throw redirect(303, '/auth/login');
 };
