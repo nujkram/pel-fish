@@ -102,7 +102,7 @@
 <div class="border border-gray-200 rounded mr-4 p-8">
 	<h1 class="text-2xl font-bold mb-4">Update {data.name}</h1>
 	<div class="md:flex md:items-center mb-4">
-		<div class="md:w-3/12" />
+		<div class="md:w-3/12"></div>
 		<div class="md:w-9/12 text-right">
 			<Button
 				type="button"
