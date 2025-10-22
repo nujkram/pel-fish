@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, afterUpdate, tick } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import { fade } from 'svelte/transition';
 	import Button from '$lib/components/reusable/Button.svelte';
@@ -21,6 +21,11 @@
 
 	$: recordId = $page.params.recordId;
 
+	// Global test - this should appear immediately when page loads
+	console.log('===== MAP PAGE LOADED =====');
+	console.log('Window location:', window.location.href);
+	console.log('Data:', data);
+
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
 		zoom: 11,
@@ -33,9 +38,11 @@
 		maxNativeZoom: 19
 	};
 
-	onMount(async (): Promise<void> => {
+	let hasInitialized = false;
+
+	const initializeMap = () => {
 		try {
-			console.log('[Map] Initializing map component...');
+			console.log('[Map] initializeMap called');
 			console.log('[Map] typeof L:', typeof L);
 			console.log('[Map] leafletMap:', leafletMap);
 
@@ -45,21 +52,8 @@
 				return;
 			}
 
-			markerCoordinates = data.markers || [];
-			console.log('[Map] Initial markers:', markerCoordinates.length);
-
-			// Wait for leafletMap to be ready with a small delay and retry
-			let retries = 0;
-			const maxRetries = 10;
-
-			while (!leafletMap && retries < maxRetries) {
-				console.log('[Map] Waiting for leafletMap... attempt', retries + 1);
-				await new Promise(resolve => setTimeout(resolve, 100));
-				retries++;
-			}
-
 			if (!leafletMap) {
-				console.error('[Map] LeafletMap component not ready after retries');
+				console.error('[Map] leafletMap not available');
 				return;
 			}
 
@@ -73,7 +67,7 @@
 			}
 
 			// Add a test to verify the map object has the 'on' method
-			console.log('[Map] Map methods available:', Object.keys(map));
+			console.log('[Map] Map methods available:', typeof map === 'object' ? Object.keys(map).slice(0, 10) : 'not an object');
 			console.log('[Map] Map.on exists:', typeof map.on === 'function');
 
 			console.log('[Map] Attaching click handler...');
@@ -88,6 +82,7 @@
 			isMapReady = true;
 
 			// Add existing markers
+			console.log('[Map] Adding', markerCoordinates.length, 'existing markers');
 			for (const coord of markerCoordinates) {
 				addMarker(coord);
 			}
@@ -103,6 +98,61 @@
 		} catch (error) {
 			console.error('[Map] Error during initialization:', error);
 			console.error('[Map] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+		}
+	};
+
+	onMount(async () => {
+		console.log('[Map] onMount triggered');
+		markerCoordinates = data.markers || [];
+
+		// Wait for the DOM and Svelte component to be ready
+		await tick();
+		console.log('[Map] After tick, leafletMap:', leafletMap);
+
+		// Try to initialize immediately
+		if (leafletMap) {
+			console.log('[Map] leafletMap available immediately');
+			initializeMap();
+			hasInitialized = true;
+		} else {
+			// If not ready, wait a bit and try again
+			console.log('[Map] leafletMap not ready, waiting...');
+			setTimeout(() => {
+				console.log('[Map] Retry after 100ms, leafletMap:', leafletMap);
+				if (leafletMap && !hasInitialized) {
+					initializeMap();
+					hasInitialized = true;
+				}
+			}, 100);
+
+			// Another retry after 500ms
+			setTimeout(() => {
+				console.log('[Map] Retry after 500ms, leafletMap:', leafletMap);
+				if (leafletMap && !hasInitialized) {
+					initializeMap();
+					hasInitialized = true;
+				}
+			}, 500);
+
+			// Final retry after 1000ms
+			setTimeout(() => {
+				console.log('[Map] Final retry after 1000ms, leafletMap:', leafletMap);
+				if (leafletMap && !hasInitialized) {
+					initializeMap();
+					hasInitialized = true;
+				} else if (!leafletMap) {
+					console.error('[Map] leafletMap NEVER became available!');
+				}
+			}, 1000);
+		}
+	});
+
+	// Svelte 4 compatible: also try using afterUpdate
+	afterUpdate(() => {
+		if (leafletMap && !hasInitialized) {
+			console.log('[Map] afterUpdate detected leafletMap, initializing...');
+			initializeMap();
+			hasInitialized = true;
 		}
 	});
 
