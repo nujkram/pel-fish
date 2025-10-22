@@ -20,12 +20,10 @@
 	export let data: any;
 
 	let recordId: string;
-	let leafletMap: any;
-	let markers: L.Marker[] = [];
-	let markerCoordinates: [number, number][] = [];
-	let message: string = '';
-	let map: L.Map | null = null;
-	let isMapReady = false;
+    let leafletMap: any;
+    let markerCoordinates: [number, number][] = [];
+    let message: string = '';
+    let isMapReady = false;
 
 	$: recordId = $page.params.recordId;
 
@@ -44,7 +42,7 @@
 		maxNativeZoom: 19
 	};
 
-	let hasInitialized = false;
+    let hasInitialized = false;
 
     // Configure default icon URLs once
     L.Icon.Default.mergeOptions({
@@ -53,66 +51,12 @@
         shadowUrl: markerShadowUrl
     });
 
-	const initializeMap = () => {
-		try {
-			console.log('[Map] initializeMap called');
-			console.log('[Map] typeof L:', typeof L);
-			console.log('[Map] leafletMap:', leafletMap);
-
-			// Check if Leaflet is loaded
-			if (typeof L === 'undefined') {
-				console.error('[Map] Leaflet library not loaded');
-				return;
-			}
-
-			if (!leafletMap) {
-				console.error('[Map] leafletMap not available');
-				return;
-			}
-
-			console.log('[Map] Getting map instance...');
-			map = leafletMap.getMap();
-			console.log('[Map] Map instance:', map);
-
-			if (!map) {
-				console.error('[Map] Failed to get map instance');
-				return;
-			}
-
-			// Add a test to verify the map object has the 'on' method
-			console.log('[Map] Map methods available:', typeof map === 'object' ? Object.keys(map).slice(0, 10) : 'not an object');
-			console.log('[Map] Map.on exists:', typeof map.on === 'function');
-
-			console.log('[Map] Attaching click handler...');
-			map.on('click', handleMapClick);
-			console.log('[Map] Click handler attached successfully');
-
-			// Also try adding a direct test handler to verify click works
-			map.on('click', (e: any) => {
-				console.log('[Map] DIRECT HANDLER - Map was clicked!', e);
-			});
-
-			isMapReady = true;
-
-			// Add existing markers
-			console.log('[Map] Adding', markerCoordinates.length, 'existing markers');
-			for (const coord of markerCoordinates) {
-				addMarker(coord);
-			}
-
-			// Focus on markers if they exist
-			if (markerCoordinates.length > 0 && markers.length > 0) {
-				const group = new L.FeatureGroup(markers);
-				map.fitBounds(group.getBounds().pad(0.5), { maxZoom: 10 });
-			}
-
-			console.log('[Map] Initialization complete, isMapReady:', isMapReady);
-			console.log('[Map] Click anywhere on the map to test...');
-		} catch (error) {
-			console.error('[Map] Error during initialization:', error);
-			console.error('[Map] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-		}
-	};
+    // Declarative event handlers using svelte-leafletjs event bridge
+    const handleMapLoad = () => {
+        isMapReady = true;
+        console.log('[Map] load event - map ready');
+        hasInitialized = true;
+    };
 
     onMount(async () => {
         console.log('[Map] onMount triggered');
@@ -120,109 +64,38 @@
             // Safe to reference window on client
             console.log('Window location:', window.location.href);
         } catch (_) {}
-		markerCoordinates = data.markers || [];
+        markerCoordinates = data.markers || [];
 
-		// Wait for the DOM and Svelte component to be ready
-		await tick();
-		console.log('[Map] After tick, leafletMap:', leafletMap);
-
-		// Try to initialize immediately
-		if (leafletMap) {
-			console.log('[Map] leafletMap available immediately');
-			initializeMap();
-			hasInitialized = true;
-		} else {
-			// If not ready, wait a bit and try again
-			console.log('[Map] leafletMap not ready, waiting...');
-			setTimeout(() => {
-				console.log('[Map] Retry after 100ms, leafletMap:', leafletMap);
-				if (leafletMap && !hasInitialized) {
-					initializeMap();
-					hasInitialized = true;
-				}
-			}, 100);
-
-			// Another retry after 500ms
-			setTimeout(() => {
-				console.log('[Map] Retry after 500ms, leafletMap:', leafletMap);
-				if (leafletMap && !hasInitialized) {
-					initializeMap();
-					hasInitialized = true;
-				}
-			}, 500);
-
-			// Final retry after 1000ms
-			setTimeout(() => {
-				console.log('[Map] Final retry after 1000ms, leafletMap:', leafletMap);
-				if (leafletMap && !hasInitialized) {
-					initializeMap();
-					hasInitialized = true;
-				} else if (!leafletMap) {
-					console.error('[Map] leafletMap NEVER became available!');
-				}
-			}, 1000);
-		}
+        // Wait for the DOM and Svelte component to be ready
+        await tick();
+        console.log('[Map] After tick, leafletMap:', leafletMap);
 	});
 
-	// Svelte 4 compatible: also try using afterUpdate
-	afterUpdate(() => {
-		if (leafletMap && !hasInitialized) {
-			console.log('[Map] afterUpdate detected leafletMap, initializing...');
-			initializeMap();
-			hasInitialized = true;
-		}
-	});
+    // Svelte 4 compatible: also keep a light afterUpdate to detect mount
+    afterUpdate(() => {
+        if (leafletMap && !hasInitialized) {
+            console.log('[Map] afterUpdate detected leafletMap');
+        }
+    });
 
-	onDestroy(() => {
+    onDestroy(() => {
 		try {
 			console.log('[Map] Cleaning up map component...');
-
-			if (map) {
-				map.off('click', handleMapClick);
-				console.log('[Map] Click handler removed');
-			}
-
-			// Clean up markers
-			markers.forEach(marker => {
-				try {
-					marker.off('click');
-					if (map) {
-						map.removeLayer(marker);
-					}
-				} catch (e) {
-					console.warn('[Map] Error cleaning up marker:', e);
-				}
-			});
-
-			markers = [];
 			isMapReady = false;
 		} catch (error) {
 			console.error('[Map] Error during cleanup:', error);
 		}
 	});
 
-	const addMarker = (coord: [number, number]) => {
-		try {
-			if (!leafletMap || !map) {
-				console.error('[Map] Cannot add marker: map not ready');
-				return;
-			}
+    const addMarker = (coord: [number, number]) => {
+        if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
+            console.error('[Map] Invalid coordinates:', coord);
+            return;
+        }
+        markerCoordinates = [...markerCoordinates, coord];
+    };
 
-			if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
-				console.error('[Map] Invalid coordinates:', coord);
-				return;
-			}
-
-			console.log('[Map] Adding marker at:', coord);
-			const marker = L.marker(coord).addTo(map);
-			marker.on('click', () => handleMarkerClick(marker));
-			markers = [...markers, marker];
-		} catch (error) {
-			console.error('[Map] Error adding marker:', error);
-		}
-	};
-
-	const handleMapClick = (e: L.LeafletMouseEvent) => {
+    const handleMapClick = (e: any) => {
 		try {
 			console.log('[Map] Map clicked:', e);
 
@@ -239,25 +112,16 @@
 			const coord: [number, number] = [e.latlng.lat, e.latlng.lng];
 			console.log('[Map] Adding marker at clicked position:', coord);
 			addMarker(coord);
-			markerCoordinates = [...markerCoordinates, coord];
 		} catch (error) {
 			console.error('[Map] Error handling map click:', error);
 		}
 	};
 
-	const handleMarkerClick = (clickedMarker: L.Marker) => {
+    const handleMarkerClick = (coord: [number, number]) => {
 		try {
-			if (!map) {
-				console.error('[Map] Cannot remove marker: map not ready');
-				return;
-			}
-
-			console.log('[Map] Marker clicked, removing...');
-			map.removeLayer(clickedMarker);
-			const index = markers.indexOf(clickedMarker);
-			markers = markers.filter((marker) => marker !== clickedMarker);
-			markerCoordinates = markerCoordinates.filter((_, i) => i !== index);
-			console.log('[Map] Marker removed. Remaining markers:', markers.length);
+            console.log('[Map] Marker clicked, removing...', coord);
+            markerCoordinates = markerCoordinates.filter((c) => c[0] !== coord[0] || c[1] !== coord[1]);
+            console.log('[Map] Marker removed. Remaining markers:', markerCoordinates.length);
 		} catch (error) {
 			console.error('[Map] Error removing marker:', error);
 		}
@@ -320,11 +184,29 @@
 			</Button>
 		</div>
 	</div>
-	<div class="h-screen w-full">
-		<LeafletMap bind:this={leafletMap} options={mapOptions}>
-			<TileLayer url={tileUrl} options={tileLayerOptions} />
-		</LeafletMap>
-	</div>
+    <div class="h-screen w-full">
+        <LeafletMap
+            bind:this={leafletMap}
+            options={mapOptions}
+            events={[
+                'load',
+                'click'
+            ]}
+            on:load={handleMapLoad}
+            on:click={handleMapClick}
+        >
+            <TileLayer url={tileUrl} options={tileLayerOptions} />
+            {#each markerCoordinates as coord (coord.join(','))}
+                <Marker
+                    latLng={coord}
+                    events={[
+                        'click'
+                    ]}
+                    on:click={() => handleMarkerClick(coord)}
+                />
+            {/each}
+        </LeafletMap>
+    </div>
 
 	{#if message}
 		<div
