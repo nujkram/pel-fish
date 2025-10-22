@@ -29,12 +29,8 @@
 
 	// Reactive statement to ensure markers are loaded from data
 	$: if (data && data.markers) {
-		console.log('[Map] Data reactive: Loading', data.markers.length, 'markers');
 		markerCoordinates = data.markers;
 	}
-
-    // Global test - logs moved to onMount to avoid any window access issues
-    console.log('===== MAP PAGE LOADED =====');
 
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
@@ -57,132 +53,79 @@
         shadowUrl: markerShadowUrl
     });
 
-    // Declarative event handlers using svelte-leafletjs event bridge
     const handleMapLoad = () => {
         isMapReady = true;
-        console.log('[Map] load event - map ready');
         hasInitialized = true;
     };
 
     onMount(async () => {
-        console.log('[Map] onMount triggered');
-        try {
-            // Safe to reference window on client
-            console.log('Window location:', window.location.href);
-        } catch (_) {}
-
-        // Markers already loaded via reactive statement, but log for debugging
-        console.log('[Map] onMount: markerCoordinates count:', markerCoordinates.length);
-
-        // Wait for the DOM and Svelte component to be ready
         await tick();
-        console.log('[Map] After tick, leafletMap:', leafletMap);
 
-        // Fallback: if load event doesn't fire, manually check if map is ready
+        // Fallback: if load event doesn't fire, manually set map ready after 1 second
         setTimeout(() => {
             if (!isMapReady && leafletMap) {
-                console.log('[Map] Fallback: load event did not fire, checking map status manually');
                 try {
                     const map = leafletMap.getMap();
                     if (map) {
-                        console.log('[Map] Fallback: Map exists, setting ready = true');
                         isMapReady = true;
                         hasInitialized = true;
-                    } else {
-                        console.error('[Map] Fallback: Map instance not available');
                     }
                 } catch (e) {
-                    console.error('[Map] Fallback error:', e);
+                    // Silent fallback
                 }
-            } else if (isMapReady) {
-                console.log('[Map] Fallback check: Map already ready');
-            } else {
-                console.error('[Map] Fallback check: leafletMap still null');
             }
         }, 1000);
 	});
 
-    // Svelte 4 compatible: also keep a light afterUpdate to detect mount
     afterUpdate(() => {
         if (leafletMap && !hasInitialized) {
-            console.log('[Map] afterUpdate detected leafletMap, attempting to set ready');
             try {
                 const map = leafletMap.getMap();
                 if (map && !isMapReady) {
-                    console.log('[Map] afterUpdate: Map is available, setting ready = true');
                     isMapReady = true;
                     hasInitialized = true;
                 }
             } catch (e) {
-                console.log('[Map] afterUpdate: Could not get map yet:', e);
+                // Silent - map not ready yet
             }
         }
     });
 
     onDestroy(() => {
-		try {
-			console.log('[Map] Cleaning up map component...');
-			isMapReady = false;
-		} catch (error) {
-			console.error('[Map] Error during cleanup:', error);
-		}
+		isMapReady = false;
 	});
 
     const addMarker = (coord: [number, number]) => {
         if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
-            console.error('[Map] Invalid coordinates:', coord);
             return;
         }
         markerCoordinates = [...markerCoordinates, coord];
     };
 
     const handleMapClick = (e: any) => {
-		try {
-			console.log('[Map] Map clicked:', e);
-			console.log('[Map] Event detail:', e.detail);
-			console.log('[Map] Event keys:', Object.keys(e));
-			console.log('[Map] isMapReady:', isMapReady);
-			console.log('[Map] hasInitialized:', hasInitialized);
-			console.log('[Map] leafletMap exists:', !!leafletMap);
+		// The event from svelte-leafletjs comes in e.detail
+		const leafletEvent = e.detail || e;
 
-			// The event from svelte-leafletjs comes in e.detail
-			const leafletEvent = e.detail || e;
-			console.log('[Map] Leaflet event:', leafletEvent);
-			console.log('[Map] Has latlng?', !!leafletEvent.latlng);
-
-			if (!isMapReady) {
-				console.warn('[Map] Map not ready for interaction - FORCING READY NOW');
-				isMapReady = true;
-				hasInitialized = true;
-			}
-
-			if (!leafletEvent || !leafletEvent.latlng) {
-				console.warn('[Map] Invalid click event or location data:', leafletEvent);
-				return;
-			}
-
-			const coord: [number, number] = [leafletEvent.latlng.lat, leafletEvent.latlng.lng];
-			console.log('[Map] Adding marker at clicked position:', coord);
-			addMarker(coord);
-		} catch (error) {
-			console.error('[Map] Error handling map click:', error);
+		// Force map ready on first click if not already ready
+		if (!isMapReady) {
+			isMapReady = true;
+			hasInitialized = true;
 		}
+
+		if (!leafletEvent || !leafletEvent.latlng) {
+			return;
+		}
+
+		const coord: [number, number] = [leafletEvent.latlng.lat, leafletEvent.latlng.lng];
+		addMarker(coord);
 	};
 
     const handleMarkerClick = (coord: [number, number]) => {
-		try {
-            console.log('[Map] Marker clicked, removing...', coord);
-            markerCoordinates = markerCoordinates.filter((c) => c[0] !== coord[0] || c[1] !== coord[1]);
-            console.log('[Map] Marker removed. Remaining markers:', markerCoordinates.length);
-		} catch (error) {
-			console.error('[Map] Error removing marker:', error);
-		}
+		markerCoordinates = markerCoordinates.filter((c) => c[0] !== coord[0] || c[1] !== coord[1]);
 	};
 
 	const handleSubmit = async (): Promise<void> => {
 		try {
-			console.log('[Map] Submitting markers:', markerCoordinates.length);
-
 			const response = await fetch('/api/admin/record/update-marker', {
 				method: 'POST',
 				headers: {
@@ -195,20 +138,17 @@
 			});
 
 			if (!response.ok) {
-				console.error('[Map] Server error:', response.status, response.statusText);
 				message = `Error: ${response.statusText}`;
 				return;
 			}
 
 			const result = await response.json();
-			console.log('[Map] Update successful:', result);
 			message = result.message;
 			setTimeout(() => {
 				message = '';
 				goto('/records');
 			}, 3000);
 		} catch (error) {
-			console.error('[Map] Error updating markers:', error);
 			message = 'Failed to update markers. Please try again.';
 		}
 	};
