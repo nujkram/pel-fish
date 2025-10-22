@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import { fade } from 'svelte/transition';
 	import Button from '$lib/components/reusable/Button.svelte';
@@ -16,6 +16,8 @@
 	let markers: L.Marker[] = [];
 	let markerCoordinates: [number, number][] = [];
 	let message: string = '';
+	let map: L.Map | null = null;
+	let isMapReady = false;
 
 	$: recordId = $page.params.recordId;
 
@@ -32,50 +34,146 @@
 	};
 
 	onMount(async (): Promise<void> => {
-		markerCoordinates = data.markers || [];
+		try {
+			console.log('[Map] Initializing map component...');
 
-		const map = leafletMap.getMap();
-		map.on('click', handleMapClick);
+			// Check if Leaflet is loaded
+			if (typeof L === 'undefined') {
+				console.error('[Map] Leaflet library not loaded');
+				return;
+			}
 
-		// Add existing markers
-		for (const coord of markerCoordinates) {
-			addMarker(coord);
+			markerCoordinates = data.markers || [];
+			console.log('[Map] Initial markers:', markerCoordinates.length);
+
+			// Wait for leafletMap to be ready
+			if (!leafletMap) {
+				console.error('[Map] LeafletMap component not ready');
+				return;
+			}
+
+			map = leafletMap.getMap();
+
+			if (!map) {
+				console.error('[Map] Failed to get map instance');
+				return;
+			}
+
+			console.log('[Map] Map instance ready, attaching click handler');
+			map.on('click', handleMapClick);
+			isMapReady = true;
+
+			// Add existing markers
+			for (const coord of markerCoordinates) {
+				addMarker(coord);
+			}
+
+			// Focus on markers if they exist
+			if (markerCoordinates.length > 0 && markers.length > 0) {
+				const group = new L.FeatureGroup(markers);
+				map.fitBounds(group.getBounds().pad(0.5), { maxZoom: 10 });
+			}
+
+			console.log('[Map] Initialization complete');
+		} catch (error) {
+			console.error('[Map] Error during initialization:', error);
 		}
+	});
 
-		// Focus on markers if they exist
-		if (markerCoordinates.length > 0) {
-			const group = new L.FeatureGroup(markers);
-			map.fitBounds(group.getBounds().pad(0.5), { maxZoom: 10 });
+	onDestroy(() => {
+		try {
+			console.log('[Map] Cleaning up map component...');
+
+			if (map) {
+				map.off('click', handleMapClick);
+				console.log('[Map] Click handler removed');
+			}
+
+			// Clean up markers
+			markers.forEach(marker => {
+				try {
+					marker.off('click');
+					if (map) {
+						map.removeLayer(marker);
+					}
+				} catch (e) {
+					console.warn('[Map] Error cleaning up marker:', e);
+				}
+			});
+
+			markers = [];
+			isMapReady = false;
+		} catch (error) {
+			console.error('[Map] Error during cleanup:', error);
 		}
 	});
 
 	const addMarker = (coord: [number, number]) => {
-		const map = leafletMap.getMap();
-		const marker = L.marker(coord).addTo(map);
-		marker.on('click', () => handleMarkerClick(marker));
-		markers = [...markers, marker];
+		try {
+			if (!leafletMap || !map) {
+				console.error('[Map] Cannot add marker: map not ready');
+				return;
+			}
+
+			if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
+				console.error('[Map] Invalid coordinates:', coord);
+				return;
+			}
+
+			console.log('[Map] Adding marker at:', coord);
+			const marker = L.marker(coord).addTo(map);
+			marker.on('click', () => handleMarkerClick(marker));
+			markers = [...markers, marker];
+		} catch (error) {
+			console.error('[Map] Error adding marker:', error);
+		}
 	};
 
 	const handleMapClick = (e: L.LeafletMouseEvent) => {
-		if (e && e.latlng) {
+		try {
+			console.log('[Map] Map clicked:', e);
+
+			if (!isMapReady) {
+				console.warn('[Map] Map not ready for interaction');
+				return;
+			}
+
+			if (!e || !e.latlng) {
+				console.warn('[Map] Invalid click event or location data:', e);
+				return;
+			}
+
 			const coord: [number, number] = [e.latlng.lat, e.latlng.lng];
+			console.log('[Map] Adding marker at clicked position:', coord);
 			addMarker(coord);
 			markerCoordinates = [...markerCoordinates, coord];
-		} else {
-			console.warn('Invalid click event or location data:', e);
+		} catch (error) {
+			console.error('[Map] Error handling map click:', error);
 		}
 	};
 
 	const handleMarkerClick = (clickedMarker: L.Marker) => {
-		const map = leafletMap.getMap();
-		map.removeLayer(clickedMarker);
-		const index = markers.indexOf(clickedMarker);
-		markers = markers.filter((marker) => marker !== clickedMarker);
-		markerCoordinates = markerCoordinates.filter((_, i) => i !== index);
+		try {
+			if (!map) {
+				console.error('[Map] Cannot remove marker: map not ready');
+				return;
+			}
+
+			console.log('[Map] Marker clicked, removing...');
+			map.removeLayer(clickedMarker);
+			const index = markers.indexOf(clickedMarker);
+			markers = markers.filter((marker) => marker !== clickedMarker);
+			markerCoordinates = markerCoordinates.filter((_, i) => i !== index);
+			console.log('[Map] Marker removed. Remaining markers:', markers.length);
+		} catch (error) {
+			console.error('[Map] Error removing marker:', error);
+		}
 	};
 
 	const handleSubmit = async (): Promise<void> => {
 		try {
+			console.log('[Map] Submitting markers:', markerCoordinates.length);
+
 			const response = await fetch('/api/admin/record/update-marker', {
 				method: 'POST',
 				headers: {
@@ -87,14 +185,22 @@
 				})
 			});
 
+			if (!response.ok) {
+				console.error('[Map] Server error:', response.status, response.statusText);
+				message = `Error: ${response.statusText}`;
+				return;
+			}
+
 			const result = await response.json();
+			console.log('[Map] Update successful:', result);
 			message = result.message;
 			setTimeout(() => {
 				message = '';
 				goto('/records');
 			}, 3000);
 		} catch (error) {
-			console.error('Error updating markers:', error);
+			console.error('[Map] Error updating markers:', error);
+			message = 'Failed to update markers. Please try again.';
 		}
 	};
 </script>
