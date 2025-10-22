@@ -5,8 +5,16 @@
 	import Button from '$lib/components/reusable/Button.svelte';
 	import { goto } from '$app/navigation';
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
-	import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
-	import L from 'leaflet';
+    // @ts-expect-error types provided via ambient declarations
+    import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
+    // @ts-expect-error types provided via ambient declarations
+    import L from 'leaflet';
+    // Explicitly set Leaflet default marker icon URLs to work in production builds
+    // Vite will resolve these assets correctly when imported with ?url
+    // Do this at module scope so it's ready before markers are created
+    import markerIcon2xUrl from 'leaflet/dist/images/marker-icon-2x.png?url';
+    import markerIconUrl from 'leaflet/dist/images/marker-icon.png?url';
+    import markerShadowUrl from 'leaflet/dist/images/marker-shadow.png?url';
 	import { page } from '$app/stores';
 
 	export let data: any;
@@ -21,10 +29,8 @@
 
 	$: recordId = $page.params.recordId;
 
-	// Global test - this should appear immediately when page loads
-	console.log('===== MAP PAGE LOADED =====');
-	console.log('Window location:', window.location.href);
-	console.log('Data:', data);
+    // Global test - logs moved to onMount to avoid any window access issues
+    console.log('===== MAP PAGE LOADED =====');
 
 	const mapOptions = {
 		center: [11.6978352, 122.6217542],
@@ -39,6 +45,13 @@
 	};
 
 	let hasInitialized = false;
+
+    // Configure default icon URLs once
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: markerIcon2xUrl,
+        iconUrl: markerIconUrl,
+        shadowUrl: markerShadowUrl
+    });
 
 	const initializeMap = () => {
 		try {
@@ -101,8 +114,12 @@
 		}
 	};
 
-	onMount(async () => {
-		console.log('[Map] onMount triggered');
+    onMount(async () => {
+        console.log('[Map] onMount triggered');
+        try {
+            // Safe to reference window on client
+            console.log('Window location:', window.location.href);
+        } catch (_) {}
 		markerCoordinates = data.markers || [];
 
 		// Wait for the DOM and Svelte component to be ready
