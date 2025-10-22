@@ -21,11 +21,17 @@
 
 	let recordId: string;
     let leafletMap: any;
-    let markerCoordinates: [number, number][] = [];
+    let markerCoordinates: [number, number][] = data.markers || [];
     let message: string = '';
     let isMapReady = false;
 
 	$: recordId = $page.params.recordId;
+
+	// Reactive statement to ensure markers are loaded from data
+	$: if (data && data.markers) {
+		console.log('[Map] Data reactive: Loading', data.markers.length, 'markers');
+		markerCoordinates = data.markers;
+	}
 
     // Global test - logs moved to onMount to avoid any window access issues
     console.log('===== MAP PAGE LOADED =====');
@@ -64,7 +70,9 @@
             // Safe to reference window on client
             console.log('Window location:', window.location.href);
         } catch (_) {}
-        markerCoordinates = data.markers || [];
+
+        // Markers already loaded via reactive statement, but log for debugging
+        console.log('[Map] onMount: markerCoordinates count:', markerCoordinates.length);
 
         // Wait for the DOM and Svelte component to be ready
         await tick();
