@@ -69,12 +69,45 @@
         // Wait for the DOM and Svelte component to be ready
         await tick();
         console.log('[Map] After tick, leafletMap:', leafletMap);
+
+        // Fallback: if load event doesn't fire, manually check if map is ready
+        setTimeout(() => {
+            if (!isMapReady && leafletMap) {
+                console.log('[Map] Fallback: load event did not fire, checking map status manually');
+                try {
+                    const map = leafletMap.getMap();
+                    if (map) {
+                        console.log('[Map] Fallback: Map exists, setting ready = true');
+                        isMapReady = true;
+                        hasInitialized = true;
+                    } else {
+                        console.error('[Map] Fallback: Map instance not available');
+                    }
+                } catch (e) {
+                    console.error('[Map] Fallback error:', e);
+                }
+            } else if (isMapReady) {
+                console.log('[Map] Fallback check: Map already ready');
+            } else {
+                console.error('[Map] Fallback check: leafletMap still null');
+            }
+        }, 1000);
 	});
 
     // Svelte 4 compatible: also keep a light afterUpdate to detect mount
     afterUpdate(() => {
         if (leafletMap && !hasInitialized) {
-            console.log('[Map] afterUpdate detected leafletMap');
+            console.log('[Map] afterUpdate detected leafletMap, attempting to set ready');
+            try {
+                const map = leafletMap.getMap();
+                if (map && !isMapReady) {
+                    console.log('[Map] afterUpdate: Map is available, setting ready = true');
+                    isMapReady = true;
+                    hasInitialized = true;
+                }
+            } catch (e) {
+                console.log('[Map] afterUpdate: Could not get map yet:', e);
+            }
         }
     });
 
