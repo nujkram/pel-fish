@@ -131,18 +131,29 @@
     const handleMapClick = (e: any) => {
 		try {
 			console.log('[Map] Map clicked:', e);
+			console.log('[Map] Event detail:', e.detail);
+			console.log('[Map] Event keys:', Object.keys(e));
+			console.log('[Map] isMapReady:', isMapReady);
+			console.log('[Map] hasInitialized:', hasInitialized);
+			console.log('[Map] leafletMap exists:', !!leafletMap);
+
+			// The event from svelte-leafletjs comes in e.detail
+			const leafletEvent = e.detail || e;
+			console.log('[Map] Leaflet event:', leafletEvent);
+			console.log('[Map] Has latlng?', !!leafletEvent.latlng);
 
 			if (!isMapReady) {
-				console.warn('[Map] Map not ready for interaction');
+				console.warn('[Map] Map not ready for interaction - FORCING READY NOW');
+				isMapReady = true;
+				hasInitialized = true;
+			}
+
+			if (!leafletEvent || !leafletEvent.latlng) {
+				console.warn('[Map] Invalid click event or location data:', leafletEvent);
 				return;
 			}
 
-			if (!e || !e.latlng) {
-				console.warn('[Map] Invalid click event or location data:', e);
-				return;
-			}
-
-			const coord: [number, number] = [e.latlng.lat, e.latlng.lng];
+			const coord: [number, number] = [leafletEvent.latlng.lat, leafletEvent.latlng.lng];
 			console.log('[Map] Adding marker at clicked position:', coord);
 			addMarker(coord);
 		} catch (error) {
