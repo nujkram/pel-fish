@@ -5,25 +5,25 @@
 	import Button from '$lib/components/reusable/Button.svelte';
 	import { goto } from '$app/navigation';
 	import CheckCircle from '$lib/components/icons/CheckCircle.svelte';
-    // @ts-expect-error types provided via ambient declarations
-    import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
-    // @ts-expect-error types provided via ambient declarations
-    import L from 'leaflet';
-    // Explicitly set Leaflet default marker icon URLs to work in production builds
-    // Vite will resolve these assets correctly when imported with ?url
-    // Do this at module scope so it's ready before markers are created
-    import markerIcon2xUrl from 'leaflet/dist/images/marker-icon-2x.png?url';
-    import markerIconUrl from 'leaflet/dist/images/marker-icon.png?url';
-    import markerShadowUrl from 'leaflet/dist/images/marker-shadow.png?url';
+	// @ts-expect-error types provided via ambient declarations
+	import { LeafletMap, Marker, TileLayer } from 'svelte-leafletjs';
+	// @ts-expect-error types provided via ambient declarations
+	import L from 'leaflet';
+	// Explicitly set Leaflet default marker icon URLs to work in production builds
+	// Vite will resolve these assets correctly when imported with ?url
+	// Do this at module scope so it's ready before markers are created
+	import markerIcon2xUrl from 'leaflet/dist/images/marker-icon-2x.png?url';
+	import markerIconUrl from 'leaflet/dist/images/marker-icon.png?url';
+	import markerShadowUrl from 'leaflet/dist/images/marker-shadow.png?url';
 	import { page } from '$app/stores';
 
 	export let data: any;
 
 	let recordId: string;
-    let leafletMap: any;
-    let markerCoordinates: [number, number][] = data.markers || [];
-    let message: string = '';
-    let isMapReady = false;
+	let leafletMap: any;
+	let markerCoordinates: [number, number][] = data.markers || [];
+	let message: string = '';
+	let isMapReady = false;
 
 	$: recordId = $page.params.recordId;
 
@@ -44,65 +44,65 @@
 		maxNativeZoom: 19
 	};
 
-    let hasInitialized = false;
+	let hasInitialized = false;
 
-    // Configure default icon URLs once
-    L.Icon.Default.mergeOptions({
-        iconRetinaUrl: markerIcon2xUrl,
-        iconUrl: markerIconUrl,
-        shadowUrl: markerShadowUrl
-    });
-
-    const handleMapLoad = () => {
-        isMapReady = true;
-        hasInitialized = true;
-    };
-
-    onMount(async () => {
-        await tick();
-
-        // Fallback: if load event doesn't fire, manually set map ready after 1 second
-        setTimeout(() => {
-            if (!isMapReady && leafletMap) {
-                try {
-                    const map = leafletMap.getMap();
-                    if (map) {
-                        isMapReady = true;
-                        hasInitialized = true;
-                    }
-                } catch (e) {
-                    // Silent fallback
-                }
-            }
-        }, 1000);
+	// Configure default icon URLs once
+	L.Icon.Default.mergeOptions({
+		iconRetinaUrl: markerIcon2xUrl,
+		iconUrl: markerIconUrl,
+		shadowUrl: markerShadowUrl
 	});
 
-    afterUpdate(() => {
-        if (leafletMap && !hasInitialized) {
-            try {
-                const map = leafletMap.getMap();
-                if (map && !isMapReady) {
-                    isMapReady = true;
-                    hasInitialized = true;
-                }
-            } catch (e) {
-                // Silent - map not ready yet
-            }
-        }
-    });
+	const handleMapLoad = () => {
+		isMapReady = true;
+		hasInitialized = true;
+	};
 
-    onDestroy(() => {
+	onMount(async () => {
+		await tick();
+
+		// Fallback: if load event doesn't fire, manually set map ready after 1 second
+		setTimeout(() => {
+			if (!isMapReady && leafletMap) {
+				try {
+					const map = leafletMap.getMap();
+					if (map) {
+						isMapReady = true;
+						hasInitialized = true;
+					}
+				} catch (e) {
+					// Silent fallback
+				}
+			}
+		}, 1000);
+	});
+
+	afterUpdate(() => {
+		if (leafletMap && !hasInitialized) {
+			try {
+				const map = leafletMap.getMap();
+				if (map && !isMapReady) {
+					isMapReady = true;
+					hasInitialized = true;
+				}
+			} catch (e) {
+				// Silent - map not ready yet
+			}
+		}
+	});
+
+	onDestroy(() => {
 		isMapReady = false;
 	});
 
-    const addMarker = (coord: [number, number]) => {
-        if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
-            return;
-        }
-        markerCoordinates = [...markerCoordinates, coord];
-    };
+	const addMarker = (coord: [number, number]) => {
+		if (!coord || coord.length !== 2 || isNaN(coord[0]) || isNaN(coord[1])) {
+			return;
+		}
+		markerCoordinates = [...markerCoordinates, coord];
+	};
 
-    const handleMapClick = (e: any) => {
+	const handleMapClick = (e: any) => {
 		// The event from svelte-leafletjs comes in e.detail
 		const leafletEvent = e.detail || e;
 
@@ -120,7 +120,7 @@
 		addMarker(coord);
 	};
 
-    const handleMarkerClick = (coord: [number, number]) => {
+	const handleMarkerClick = (coord: [number, number]) => {
 		markerCoordinates = markerCoordinates.filter((c) => c[0] !== coord[0] || c[1] !== coord[1]);
 	};
 
@@ -176,29 +176,20 @@
 			</Button>
 		</div>
 	</div>
-    <div class="h-screen w-full">
-        <LeafletMap
-            bind:this={leafletMap}
-            options={mapOptions}
-            events={[
-                'load',
-                'click'
-            ]}
-            on:load={handleMapLoad}
-            on:click={handleMapClick}
-        >
-            <TileLayer url={tileUrl} options={tileLayerOptions} />
-            {#each markerCoordinates as coord (coord.join(','))}
-                <Marker
-                    latLng={coord}
-                    events={[
-                        'click'
-                    ]}
-                    on:click={() => handleMarkerClick(coord)}
-                />
-            {/each}
-        </LeafletMap>
-    </div>
+	<div class="h-screen w-full">
+		<LeafletMap
+			bind:this={leafletMap}
+			options={mapOptions}
+			events={['load', 'click']}
+			on:load={handleMapLoad}
+			on:click={handleMapClick}
+		>
+			<TileLayer url={tileUrl} options={tileLayerOptions} />
+			{#each markerCoordinates as coord (coord.join(','))}
+				<Marker latLng={coord} events={['click']} on:click={() => handleMarkerClick(coord)} />
+			{/each}
+		</LeafletMap>
+	</div>
 
 	{#if message}
 		<div

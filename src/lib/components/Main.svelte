@@ -78,13 +78,13 @@
 	// Note: Using immediate fetch instead of onMount due to onMount not firing reliably
 	if (typeof window !== 'undefined') {
 		fetchData('/api/admin/record')
-			.then(data => {
+			.then((data) => {
 				if (data && Array.isArray(data)) {
 					records = data;
 					sortItems(records, 'name', 'asc');
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.error('Error fetching records:', error);
 			});
 	}
