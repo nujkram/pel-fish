@@ -36,6 +36,8 @@
 	onMount(async (): Promise<void> => {
 		try {
 			console.log('[Map] Initializing map component...');
+			console.log('[Map] typeof L:', typeof L);
+			console.log('[Map] leafletMap:', leafletMap);
 
 			// Check if Leaflet is loaded
 			if (typeof L === 'undefined') {
@@ -46,21 +48,43 @@
 			markerCoordinates = data.markers || [];
 			console.log('[Map] Initial markers:', markerCoordinates.length);
 
-			// Wait for leafletMap to be ready
+			// Wait for leafletMap to be ready with a small delay and retry
+			let retries = 0;
+			const maxRetries = 10;
+
+			while (!leafletMap && retries < maxRetries) {
+				console.log('[Map] Waiting for leafletMap... attempt', retries + 1);
+				await new Promise(resolve => setTimeout(resolve, 100));
+				retries++;
+			}
+
 			if (!leafletMap) {
-				console.error('[Map] LeafletMap component not ready');
+				console.error('[Map] LeafletMap component not ready after retries');
 				return;
 			}
 
+			console.log('[Map] Getting map instance...');
 			map = leafletMap.getMap();
+			console.log('[Map] Map instance:', map);
 
 			if (!map) {
 				console.error('[Map] Failed to get map instance');
 				return;
 			}
 
-			console.log('[Map] Map instance ready, attaching click handler');
+			// Add a test to verify the map object has the 'on' method
+			console.log('[Map] Map methods available:', Object.keys(map));
+			console.log('[Map] Map.on exists:', typeof map.on === 'function');
+
+			console.log('[Map] Attaching click handler...');
 			map.on('click', handleMapClick);
+			console.log('[Map] Click handler attached successfully');
+
+			// Also try adding a direct test handler to verify click works
+			map.on('click', (e: any) => {
+				console.log('[Map] DIRECT HANDLER - Map was clicked!', e);
+			});
+
 			isMapReady = true;
 
 			// Add existing markers
@@ -74,9 +98,11 @@
 				map.fitBounds(group.getBounds().pad(0.5), { maxZoom: 10 });
 			}
 
-			console.log('[Map] Initialization complete');
+			console.log('[Map] Initialization complete, isMapReady:', isMapReady);
+			console.log('[Map] Click anywhere on the map to test...');
 		} catch (error) {
 			console.error('[Map] Error during initialization:', error);
+			console.error('[Map] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 		}
 	});
 
@@ -208,7 +234,13 @@
 <div class="border border-gray-200 rounded mr-4 p-8">
 	<h1 class="text-2xl font-bold mb-4">Update {data.name}</h1>
 	<div class="md:flex md:items-center mb-4">
-		<div class="md:w-3/12"></div>
+		<div class="md:w-3/12">
+			{#if isMapReady}
+				<span class="text-green-600 font-semibold">Map Ready - Click to add pins</span>
+			{:else}
+				<span class="text-yellow-600 font-semibold">Loading map...</span>
+			{/if}
+		</div>
 		<div class="md:w-9/12 text-right">
 			<Button
 				type="button"
