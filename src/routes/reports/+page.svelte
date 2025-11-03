@@ -160,87 +160,87 @@
 			if (ctxBar) {
 				if (threatChart) threatChart.destroy();
 				threatChart = new Chart(ctxBar, {
-				type: 'bar',
-				data: {
-					labels: threatData.map((item) => item.threat),
-					datasets: [
-						{
-							label: 'Number of Species',
-							data: threatData.map((item) => item.count),
-							backgroundColor: [
-								'rgba(34, 197, 94, 0.7)',
-								'rgba(59, 130, 246, 0.7)',
-								'rgba(234, 179, 8, 0.7)',
-								'rgba(249, 115, 22, 0.7)',
-								'rgba(239, 68, 68, 0.7)',
-								'rgba(127, 29, 29, 0.7)'
-							],
-							borderColor: [
-								'rgba(34, 197, 94, 1)',
-								'rgba(59, 130, 246, 1)',
-								'rgba(234, 179, 8, 1)',
-								'rgba(249, 115, 22, 1)',
-								'rgba(239, 68, 68, 1)',
-								'rgba(127, 29, 29, 1)'
-							],
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						legend: { display: false },
-						title: {
-							display: true,
-							text: 'Species Count by Threat Level',
-							font: { size: 16, weight: 'bold' }
-						}
+					type: 'bar',
+					data: {
+						labels: threatData.map((item) => item.threat),
+						datasets: [
+							{
+								label: 'Number of Species',
+								data: threatData.map((item) => item.count),
+								backgroundColor: [
+									'rgba(34, 197, 94, 0.7)',
+									'rgba(59, 130, 246, 0.7)',
+									'rgba(234, 179, 8, 0.7)',
+									'rgba(249, 115, 22, 0.7)',
+									'rgba(239, 68, 68, 0.7)',
+									'rgba(127, 29, 29, 0.7)'
+								],
+								borderColor: [
+									'rgba(34, 197, 94, 1)',
+									'rgba(59, 130, 246, 1)',
+									'rgba(234, 179, 8, 1)',
+									'rgba(249, 115, 22, 1)',
+									'rgba(239, 68, 68, 1)',
+									'rgba(127, 29, 29, 1)'
+								],
+								borderWidth: 2
+							}
+						]
 					},
-					scales: {
-						y: { beginAtZero: true, ticks: { precision: 0 } }
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: { display: false },
+							title: {
+								display: true,
+								text: 'Species Count by Threat Level',
+								font: { size: 16, weight: 'bold' }
+							}
+						},
+						scales: {
+							y: { beginAtZero: true, ticks: { precision: 0 } }
+						}
 					}
-				}
-			});
-		}
+				});
+			}
 
-		// Pie Chart
-		const ctxPie = document.getElementById('threatPieChart');
-		if (ctxPie) {
-			if (threatPieChart) threatPieChart.destroy();
-			threatPieChart = new Chart(ctxPie, {
-				type: 'pie',
-				data: {
-					labels: threatData.map((item) => item.threat),
-					datasets: [
-						{
-							data: threatData.map((item) => item.count),
-							backgroundColor: [
-								'rgba(34, 197, 94, 0.8)',
-								'rgba(59, 130, 246, 0.8)',
-								'rgba(234, 179, 8, 0.8)',
-								'rgba(249, 115, 22, 0.8)',
-								'rgba(239, 68, 68, 0.8)',
-								'rgba(127, 29, 29, 0.8)'
-							],
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						legend: { position: 'right' },
-						title: {
-							display: true,
-							text: 'Threat Level Distribution',
-							font: { size: 16, weight: 'bold' }
+			// Pie Chart
+			const ctxPie = document.getElementById('threatPieChart');
+			if (ctxPie) {
+				if (threatPieChart) threatPieChart.destroy();
+				threatPieChart = new Chart(ctxPie, {
+					type: 'pie',
+					data: {
+						labels: threatData.map((item) => item.threat),
+						datasets: [
+							{
+								data: threatData.map((item) => item.count),
+								backgroundColor: [
+									'rgba(34, 197, 94, 0.8)',
+									'rgba(59, 130, 246, 0.8)',
+									'rgba(234, 179, 8, 0.8)',
+									'rgba(249, 115, 22, 0.8)',
+									'rgba(239, 68, 68, 0.8)',
+									'rgba(127, 29, 29, 0.8)'
+								],
+								borderWidth: 2
+							}
+						]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: { position: 'right' },
+							title: {
+								display: true,
+								text: 'Threat Level Distribution',
+								font: { size: 16, weight: 'bold' }
+							}
 						}
 					}
-				}
-			});
+				});
 			}
 		}, 10);
 	}
@@ -253,75 +253,75 @@
 			// Country Chart
 			const ctxCountry = document.getElementById('countryChart');
 			if (ctxCountry && geographicData.byCountry.length > 0) {
-			if (countryChart) countryChart.destroy();
-			countryChart = new Chart(ctxCountry, {
-				type: 'bar',
-				data: {
-					labels: geographicData.byCountry.map((item) => item.name),
-					datasets: [
-						{
-							label: 'Species Count',
-							data: geographicData.byCountry.map((item) => item.count),
-							backgroundColor: 'rgba(59, 130, 246, 0.7)',
-							borderColor: 'rgba(59, 130, 246, 1)',
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					indexAxis: 'y',
-					plugins: {
-						legend: { display: false },
-						title: {
-							display: true,
-							text: 'Top Countries by Species Count',
-							font: { size: 16, weight: 'bold' }
-						}
+				if (countryChart) countryChart.destroy();
+				countryChart = new Chart(ctxCountry, {
+					type: 'bar',
+					data: {
+						labels: geographicData.byCountry.map((item) => item.name),
+						datasets: [
+							{
+								label: 'Species Count',
+								data: geographicData.byCountry.map((item) => item.count),
+								backgroundColor: 'rgba(59, 130, 246, 0.7)',
+								borderColor: 'rgba(59, 130, 246, 1)',
+								borderWidth: 2
+							}
+						]
 					},
-					scales: {
-						x: { beginAtZero: true, ticks: { precision: 0 } }
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						indexAxis: 'y',
+						plugins: {
+							legend: { display: false },
+							title: {
+								display: true,
+								text: 'Top Countries by Species Count',
+								font: { size: 16, weight: 'bold' }
+							}
+						},
+						scales: {
+							x: { beginAtZero: true, ticks: { precision: 0 } }
+						}
 					}
-				}
-			});
-		}
+				});
+			}
 
-		// Municipality Chart
-		const ctxMunicipality = document.getElementById('municipalityChart');
-		if (ctxMunicipality && geographicData.byMunicipality.length > 0) {
-			if (municipalityChart) municipalityChart.destroy();
-			municipalityChart = new Chart(ctxMunicipality, {
-				type: 'bar',
-				data: {
-					labels: geographicData.byMunicipality.map((item) => item.name),
-					datasets: [
-						{
-							label: 'Species Count',
-							data: geographicData.byMunicipality.map((item) => item.count),
-							backgroundColor: 'rgba(34, 197, 94, 0.7)',
-							borderColor: 'rgba(34, 197, 94, 1)',
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					indexAxis: 'y',
-					plugins: {
-						legend: { display: false },
-						title: {
-							display: true,
-							text: 'Top Municipalities by Species Count',
-							font: { size: 16, weight: 'bold' }
-						}
+			// Municipality Chart
+			const ctxMunicipality = document.getElementById('municipalityChart');
+			if (ctxMunicipality && geographicData.byMunicipality.length > 0) {
+				if (municipalityChart) municipalityChart.destroy();
+				municipalityChart = new Chart(ctxMunicipality, {
+					type: 'bar',
+					data: {
+						labels: geographicData.byMunicipality.map((item) => item.name),
+						datasets: [
+							{
+								label: 'Species Count',
+								data: geographicData.byMunicipality.map((item) => item.count),
+								backgroundColor: 'rgba(34, 197, 94, 0.7)',
+								borderColor: 'rgba(34, 197, 94, 1)',
+								borderWidth: 2
+							}
+						]
 					},
-					scales: {
-						x: { beginAtZero: true, ticks: { precision: 0 } }
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						indexAxis: 'y',
+						plugins: {
+							legend: { display: false },
+							title: {
+								display: true,
+								text: 'Top Municipalities by Species Count',
+								font: { size: 16, weight: 'bold' }
+							}
+						},
+						scales: {
+							x: { beginAtZero: true, ticks: { precision: 0 } }
+						}
 					}
-				}
-			});
+				});
 			}
 		}, 10);
 	}
@@ -333,77 +333,80 @@
 		setTimeout(() => {
 			// Timeline Chart
 			const ctxTimeline = document.getElementById('timelineChart');
-			console.log('Timeline chart:', { ctxTimeline, timelineLength: userActivityData.timeline?.length });
+			console.log('Timeline chart:', {
+				ctxTimeline,
+				timelineLength: userActivityData.timeline?.length
+			});
 			if (ctxTimeline && userActivityData.timeline.length > 0) {
-			if (timelineChart) timelineChart.destroy();
-			timelineChart = new Chart(ctxTimeline, {
-				type: 'line',
-				data: {
-					labels: userActivityData.timeline.map((item) => item.label),
-					datasets: [
-						{
-							label: 'Records Created',
-							data: userActivityData.timeline.map((item) => item.count),
-							borderColor: 'rgba(59, 130, 246, 1)',
-							backgroundColor: 'rgba(59, 130, 246, 0.1)',
-							tension: 0.4,
-							fill: true
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						title: {
-							display: true,
-							text: 'Records Created Over Time (Last 12 Months)',
-							font: { size: 16, weight: 'bold' }
-						}
+				if (timelineChart) timelineChart.destroy();
+				timelineChart = new Chart(ctxTimeline, {
+					type: 'line',
+					data: {
+						labels: userActivityData.timeline.map((item) => item.label),
+						datasets: [
+							{
+								label: 'Records Created',
+								data: userActivityData.timeline.map((item) => item.count),
+								borderColor: 'rgba(59, 130, 246, 1)',
+								backgroundColor: 'rgba(59, 130, 246, 0.1)',
+								tension: 0.4,
+								fill: true
+							}
+						]
 					},
-					scales: {
-						y: { beginAtZero: true, ticks: { precision: 0 } }
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							title: {
+								display: true,
+								text: 'Records Created Over Time (Last 12 Months)',
+								font: { size: 16, weight: 'bold' }
+							}
+						},
+						scales: {
+							y: { beginAtZero: true, ticks: { precision: 0 } }
+						}
 					}
-				}
-			});
-		}
+				});
+			}
 
-		// Contributors Chart
-		const ctxContributors = document.getElementById('contributorsChart');
-		if (ctxContributors && userActivityData.topContributors.length > 0) {
-			if (contributorsChart) contributorsChart.destroy();
-			const top10 = userActivityData.topContributors.slice(0, 10);
-			contributorsChart = new Chart(ctxContributors, {
-				type: 'bar',
-				data: {
-					labels: top10.map((item) => item.userName),
-					datasets: [
-						{
-							label: 'Records Created',
-							data: top10.map((item) => item.recordsCreated),
-							backgroundColor: 'rgba(168, 85, 247, 0.7)',
-							borderColor: 'rgba(168, 85, 247, 1)',
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					indexAxis: 'y',
-					plugins: {
-						legend: { display: false },
-						title: {
-							display: true,
-							text: 'Top 10 Contributors',
-							font: { size: 16, weight: 'bold' }
-						}
+			// Contributors Chart
+			const ctxContributors = document.getElementById('contributorsChart');
+			if (ctxContributors && userActivityData.topContributors.length > 0) {
+				if (contributorsChart) contributorsChart.destroy();
+				const top10 = userActivityData.topContributors.slice(0, 10);
+				contributorsChart = new Chart(ctxContributors, {
+					type: 'bar',
+					data: {
+						labels: top10.map((item) => item.userName),
+						datasets: [
+							{
+								label: 'Records Created',
+								data: top10.map((item) => item.recordsCreated),
+								backgroundColor: 'rgba(168, 85, 247, 0.7)',
+								borderColor: 'rgba(168, 85, 247, 1)',
+								borderWidth: 2
+							}
+						]
 					},
-					scales: {
-						x: { beginAtZero: true, ticks: { precision: 0 } }
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						indexAxis: 'y',
+						plugins: {
+							legend: { display: false },
+							title: {
+								display: true,
+								text: 'Top 10 Contributors',
+								font: { size: 16, weight: 'bold' }
+							}
+						},
+						scales: {
+							x: { beginAtZero: true, ticks: { precision: 0 } }
+						}
 					}
-				}
-			});
+				});
 			}
 		}, 10);
 	}
@@ -415,41 +418,44 @@
 		setTimeout(() => {
 			// Environment Chart
 			const ctxEnvironment = document.getElementById('environmentChart');
-			console.log('Environment chart:', { ctxEnvironment, envLength: biodiversityData.byEnvironment?.length });
+			console.log('Environment chart:', {
+				ctxEnvironment,
+				envLength: biodiversityData.byEnvironment?.length
+			});
 			if (ctxEnvironment && biodiversityData.byEnvironment.length > 0) {
-			if (environmentChart) environmentChart.destroy();
-			environmentChart = new Chart(ctxEnvironment, {
-				type: 'doughnut',
-				data: {
-					labels: biodiversityData.byEnvironment.map((item) => item.environment),
-					datasets: [
-						{
-							data: biodiversityData.byEnvironment.map((item) => item.count),
-							backgroundColor: [
-								'rgba(59, 130, 246, 0.8)',
-								'rgba(34, 197, 94, 0.8)',
-								'rgba(234, 179, 8, 0.8)',
-								'rgba(239, 68, 68, 0.8)',
-								'rgba(168, 85, 247, 0.8)',
-								'rgba(249, 115, 22, 0.8)'
-							],
-							borderWidth: 2
-						}
-					]
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						legend: { position: 'right' },
-						title: {
-							display: true,
-							text: 'Species by Environment',
-							font: { size: 16, weight: 'bold' }
+				if (environmentChart) environmentChart.destroy();
+				environmentChart = new Chart(ctxEnvironment, {
+					type: 'doughnut',
+					data: {
+						labels: biodiversityData.byEnvironment.map((item) => item.environment),
+						datasets: [
+							{
+								data: biodiversityData.byEnvironment.map((item) => item.count),
+								backgroundColor: [
+									'rgba(59, 130, 246, 0.8)',
+									'rgba(34, 197, 94, 0.8)',
+									'rgba(234, 179, 8, 0.8)',
+									'rgba(239, 68, 68, 0.8)',
+									'rgba(168, 85, 247, 0.8)',
+									'rgba(249, 115, 22, 0.8)'
+								],
+								borderWidth: 2
+							}
+						]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: { position: 'right' },
+							title: {
+								display: true,
+								text: 'Species by Environment',
+								font: { size: 16, weight: 'bold' }
+							}
 						}
 					}
-				}
-			});
+				});
 			}
 		}, 10);
 	}
@@ -468,7 +474,9 @@
 				if (threatData) {
 					csvContent =
 						'Threat Level,Count,Percentage\n' +
-						threatData.map((item) => `"${item.threat}",${item.count},${item.percentage}`).join('\n');
+						threatData
+							.map((item) => `"${item.threat}",${item.count},${item.percentage}`)
+							.join('\n');
 					filename = 'threat-distribution.csv';
 				}
 				break;
@@ -516,7 +524,6 @@
 			link.click();
 		}
 	}
-
 
 	// Cleanup charts on unmount
 	onDestroy(() => {
@@ -600,8 +607,9 @@
 
 					{#if loading.threat}
 						<div class="text-center py-12">
-							<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
-							></div>
+							<div
+								class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+							/>
 							<p class="mt-4 text-gray-600">Loading threat distribution data...</p>
 						</div>
 					{:else if threatData}
@@ -623,8 +631,8 @@
 								<h3 class="text-sm font-medium text-red-900 mb-1">Dangerous Species</h3>
 								<p class="text-3xl font-bold text-red-600">
 									{threatData
-										.filter((item) =>
-											item.threat.includes('Dangerous') || item.threat === 'Unpredictable'
+										.filter(
+											(item) => item.threat.includes('Dangerous') || item.threat === 'Unpredictable'
 										)
 										.reduce((sum, item) => sum + item.count, 0)}
 								</p>
@@ -635,12 +643,12 @@
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							<div class="bg-white border rounded-lg p-4">
 								<div style="height: 400px;">
-									<canvas id="threatBarChart"></canvas>
+									<canvas id="threatBarChart" />
 								</div>
 							</div>
 							<div class="bg-white border rounded-lg p-4">
 								<div style="height: 400px;">
-									<canvas id="threatPieChart"></canvas>
+									<canvas id="threatPieChart" />
 								</div>
 							</div>
 						</div>
@@ -714,8 +722,9 @@
 
 					{#if loading.geographic}
 						<div class="text-center py-12">
-							<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
-							></div>
+							<div
+								class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+							/>
 							<p class="mt-4 text-gray-600">Loading geographic data...</p>
 						</div>
 					{:else if geographicData}
@@ -729,7 +738,9 @@
 										{#each markerPositions as marker}
 											<svelte:component
 												this={Marker}
-												latLng={marker.latitude && marker.longitude ? [marker.latitude, marker.longitude] : marker.markers?.[0] || [0, 0]}
+												latLng={marker.latitude && marker.longitude
+													? [marker.latitude, marker.longitude]
+													: marker.markers?.[0] || [0, 0]}
 											>
 												<svelte:component this={Popup}>
 													<div class="p-2">
@@ -755,14 +766,14 @@
 							{#if geographicData.byCountry.length > 0}
 								<div class="bg-white border rounded-lg p-4">
 									<div style="height: 400px;">
-										<canvas id="countryChart"></canvas>
+										<canvas id="countryChart" />
 									</div>
 								</div>
 							{/if}
 							{#if geographicData.byMunicipality.length > 0}
 								<div class="bg-white border rounded-lg p-4">
 									<div style="height: 400px;">
-										<canvas id="municipalityChart"></canvas>
+										<canvas id="municipalityChart" />
 									</div>
 								</div>
 							{/if}
@@ -823,8 +834,9 @@
 
 					{#if loading.userActivity}
 						<div class="text-center py-12">
-							<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
-							></div>
+							<div
+								class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+							/>
 							<p class="mt-4 text-gray-600">Loading user activity data...</p>
 						</div>
 					{:else if userActivityData}
@@ -833,14 +845,14 @@
 							{#if userActivityData.timeline.length > 0}
 								<div class="bg-white border rounded-lg p-4">
 									<div style="height: 300px;">
-										<canvas id="timelineChart"></canvas>
+										<canvas id="timelineChart" />
 									</div>
 								</div>
 							{/if}
 							{#if userActivityData.topContributors.length > 0}
 								<div class="bg-white border rounded-lg p-4">
 									<div style="height: 400px;">
-										<canvas id="contributorsChart"></canvas>
+										<canvas id="contributorsChart" />
 									</div>
 								</div>
 							{/if}
@@ -958,8 +970,9 @@
 
 					{#if loading.biodiversity}
 						<div class="text-center py-12">
-							<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
-							></div>
+							<div
+								class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+							/>
 							<p class="mt-4 text-gray-600">Loading biodiversity data...</p>
 						</div>
 					{:else if biodiversityData}
@@ -993,7 +1006,7 @@
 						{#if biodiversityData.byEnvironment.length > 0}
 							<div class="bg-white border rounded-lg p-4">
 								<div style="height: 400px;">
-									<canvas id="environmentChart"></canvas>
+									<canvas id="environmentChart" />
 								</div>
 							</div>
 						{/if}

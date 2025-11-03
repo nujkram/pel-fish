@@ -87,9 +87,8 @@
 		if (pageMaxIndex < itemSize) currentPage += 1;
 	};
 
-	onMount(async () => {
-		loadUsers();
-	});
+	// Load users on component initialization
+	let loadingPromise = loadUsers();
 
 	$: {
 		// Prevent user to input below the minimum or beyond the maximum value of pagesize.
@@ -105,7 +104,7 @@
 								user?.profile?.firstName.match(RegExp(search, 'gi'));
 			  })
 			: items.filter((user) => {
-					return status !== 'all' ? user?.isActive === (status === 'active') : items;
+					return status !== 'all' ? user?.isActive === (status === 'active') : true;
 			  });
 		if (paginatedItems.length) {
 			itemSize = paginatedItems.length;
